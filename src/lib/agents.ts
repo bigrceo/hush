@@ -5,6 +5,8 @@ import { fromBase } from "@/gate";
 import { HUSH_SECRET, RPC_URL } from "./config";
 import { addSpend, getAgent, getAgentSecrets, insertAgent, isFrozenAll, tagReceiptAgent, today, type Agent } from "./store";
 import { listing, listingTotal } from "./shop";
+import { credit, debit, ledgerBalance, poolPayer, sweepDeposit } from "./pool";
+import { FEE } from "./poolmath";
 
 /** Agent wallets are random keypairs; the secret key is stored AES-GCM-sealed in D1. */
 export async function agentKeypair(id: string): Promise<Keypair> {
@@ -64,26 +66,52 @@ export async function agentBuy(a: Agent, listingId: string, input: string | unde
   await checkLeash(a, l.id, listingTotal(l)); // pre-check with list price
   const url = new URL(`/api/shop/${l.id}`, origin);
   if (l.input && input) url.searchParams.set(l.input, input);
-  const kp = await agentKeypair(a.id);
+
+  // Fold any fresh deposit into the pool before spending (only if the ledger can't already cover it,
+  // so deposits and buys are not back-to-back on-chain more than necessary).
+  const listLamports = Math.round(listingTotal(l) * 1e9);
+  if ((await ledgerBalance(a.id)) < listLamports + FEE) await sweepDeposit(a.id, await agentKeypair(a.id));
+
   const t0 = Date.now();
+  let held = 0;
+  let payer = null as Awaited<ReturnType<typeof poolPayer>>;
   const { res, paid } = await hushFetch(url.toString(), {
-    keypair: kp,
     rpcUrl: RPC_URL,
-    approve: async (r: Requirement) => {
+    // The payment is signed by a HUSH pool address, never by the agent's own deposit address.
+    keypair: async (r: Requirement) => {
       const sol = r.currency === "SOL" ? +fromBase(BigInt(r.maxAmountRequired), "SOL") : 0;
       await checkLeash(a, l.id, sol); // re-check against what the seller actually asks
-      return true;
+      if (r.currency !== "SOL") throw new LeashError("pool payments support SOL only for now", 400);
+      const lamports = Number(r.maxAmountRequired) + FEE;
+      if (!(await debit(a.id, lamports, "buy", null))) throw new LeashError(`insufficient HUSH balance (need ${(lamports / 1e9).toFixed(6)} SOL incl. fee)`, 402);
+      held = lamports;
+      payer = await poolPayer(lamports - FEE);
+      if (!payer) {
+        await credit(a.id, lamports, "release", null);
+        held = 0;
+        throw new LeashError("pool liquidity is rebalancing, try again shortly", 503);
+      }
+      return payer;
     },
+  }).catch(async (e) => {
+    if (held) await credit(a.id, held, "release", null); // payment never left the pool
+    throw e;
   });
   const body = await res.json().catch(() => ({}));
   if (paid) {
     const sol = paid.requirement.currency === "SOL" ? +fromBase(BigInt(paid.requirement.maxAmountRequired), "SOL") : 0;
     if (res.ok) await addSpend(a.id, sol);
+    // Escrow refund goes back to the pool address that paid; credit the agent's ledger for it.
+    else if (body?.refundSignature) await credit(a.id, Number(paid.requirement.maxAmountRequired) - FEE, "refund", body.refundSignature);
     await tagReceiptAgent(paid.signature, a.id);
   }
-  return { status: res.status, ok: res.ok, listing: l.id, paid: paid ? { signature: paid.signature, amount: paid.requirement.maxAmountRequired, currency: paid.requirement.currency, legs: paid.requirement.extra.legs.length } : null, ms: Date.now() - t0, result: body };
+  return { status: res.status, ok: res.ok, listing: l.id, paid: paid ? { signature: paid.signature, from: (payer as unknown as { publicKey?: { toBase58(): string } })?.publicKey?.toBase58() ?? null, amount: paid.requirement.maxAmountRequired, currency: paid.requirement.currency, legs: paid.requirement.extra.legs.length } : null, ms: Date.now() - t0, result: body };
 }
 
+/** Spendable balance (ledger) plus anything still waiting on the deposit address. */
 export async function agentBalance(a: Agent) {
+  return (await ledgerBalance(a.id)) / 1e9;
+}
+export async function agentPendingDeposit(a: Agent) {
   return (await new Connection(RPC_URL, "confirmed").getBalance(new (await import("@solana/web3.js")).PublicKey(a.pubkey))) / 1e9;
 }

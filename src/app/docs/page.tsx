@@ -50,7 +50,7 @@ export const GET = hushGate({
           <Code label="agent.ts">{`import { hushFetch } from "@hush/gate/client";
 const { res } = await hushFetch(url, { keypair, rpcUrl,
   approve: (req) => BigInt(req.maxAmountRequired) <= 1_000_000n });`}</Code></> },
-        { id: "leash", title: "Leash", body: <p>Each agent wallet is derived server-side and funded by its owner. Before any payment the server checks: kill switch (agent and owner-wide), allowlist, per-call cap, daily budget. The check runs twice, against the list price and against the seller&apos;s actual 402. Owners edit limits with a Phantom-signed session.</p> },
+        { id: "leash", title: "Leash", body: <p>Each agent gets a deposit address funded by its owner; deposits are swept into the shared HUSH pool and credited to the agent&apos;s balance in an internal ledger. Every buy is paid from a pool address, never from the agent&apos;s own, so the agent and the seller are not linked on-chain (deposits into HUSH, amounts and timing stay visible; the pool is custodial). Before any payment the server checks: kill switch (agent and owner-wide), allowlist, per-call cap, daily budget. The check runs twice, against the list price and against the seller&apos;s actual 402. Owners edit limits with a Phantom-signed session.</p> },
         { id: "mcp", title: "MCP server", body: <>
           <p>A stdio MCP server ships in <code>mcp/server.mjs</code>. Tools: <code>hush_shop</code>, <code>hush_buy</code>, <code>hush_wallet</code>, <code>hush_receipts</code>.</p>
           <Code label="claude_desktop_config.json">{`{ "mcpServers": { "hush": { "command": "node", "args": ["/path/to/hush/mcp/server.mjs"],

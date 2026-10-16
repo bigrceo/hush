@@ -18,7 +18,7 @@ type Phantom = {
 };
 const phantom = () => (typeof window !== "undefined" ? ((window as unknown as { phantom?: { solana?: Phantom } }).phantom?.solana) : undefined);
 
-type Agent = { id: string; name: string; pubkey: string; dailyBudget: number; perCallCap: number; allowlist: string[]; frozen: boolean; spent: { day: string; sol: number }; balance: number | null };
+type Agent = { id: string; name: string; pubkey: string; dailyBudget: number; perCallCap: number; allowlist: string[]; frozen: boolean; spent: { day: string; sol: number }; balance: number | null; pendingDeposit?: number | null };
 type Listing = { id: string; name: string; seller: string; total: number; currency: string; input?: string; blurb: string };
 type Receipt = { nonce: string; listing: string; total: string; currency: string; ok: boolean; signature: string; refundSignature?: string; legs: { seller: string; payTo: string }[]; latencyMs: number; at: number; commitment: string; epochId?: number | null };
 
@@ -194,9 +194,11 @@ export default function Dapp() {
               <>
                 <div className="card grid gap-6 p-6 md:grid-cols-2">
                   <div>
-                    <p className="label">Agent wallet</p>
+                    <p className="label">HUSH balance · paid from the shared pool</p>
                     <p className="title mt-2 text-3xl">{agent.balance?.toFixed(4) ?? "…"} <span className="hush-text">SOL</span></p>
-                    <p className="mt-2 break-all font-mono text-xs text-muted">{agent.pubkey}</p>
+                    <p className="mt-2 text-xs text-muted">Deposit address (funds are swept into the HUSH pool; buys never come from here)</p>
+                    <p className="mt-1 break-all font-mono text-xs text-muted">{agent.pubkey}</p>
+                    {!!agent.pendingDeposit && agent.pendingDeposit > 0 && <p className="mt-1 text-xs hush-text">{agent.pendingDeposit.toFixed(4)} SOL arriving, joins the pool on next refresh</p>}
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button disabled={busy} onClick={() => fund(0.05)} className="btn btn-hush h-9">Fund 0.05 SOL</button>
                       {CLUSTER === "devnet" && <button disabled={busy} onClick={airdrop} className="btn btn-ghost h-9">Devnet airdrop</button>}

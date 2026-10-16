@@ -48,6 +48,6 @@ const { res } = await hushFetch("https://seller.example/api/forecast", { keypair
 
 ## Limits
 
-Hides payee linkage, not the buyer's wallet. Not zero-knowledge. USDC verification is implemented but less tested than SOL; USDC refunds are not automatic.
+On its own, hush-x402 hides the payee, not the buyer's wallet (on hushagents.com buyers pay from a shared pool, which hides that too). Not zero-knowledge. USDC verification is implemented but less tested than SOL; USDC refunds are not automatic.
 
 Part of [HUSH](https://hushagents.com) · [source](https://github.com/bigrceo/hush) · MIT

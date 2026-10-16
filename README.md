@@ -18,6 +18,7 @@ Live: https://hushagents.com · Verify a receipt: https://hushagents.com/verify 
 | **Merkle epochs** | `src/lib/merkle.ts`, `src/lib/epochs.ts` | Hourly (Vercel Cron) the new commitments become leaves (`sha256("hush-leaf-v1:" + commitment)`), the root is stored and anchored on Solana with an SPL Memo `HUSH receipts root v1 <epoch> <root> <count>`, signed by a publisher key derived from `HUSH_SECRET`. |
 | **Proofs + /verify** | `src/app/api/receipts/[nonce]/proof`, `src/app/verify` | Owners download a proof per receipt (leaf, path, epoch, root, anchor tx). `/verify` recomputes the root in the browser, reads the memo from Solana and checks the signer. No other receipt is revealed. |
 | **Hush Score** | `src/lib/store.ts`, `/api/stats` | Per-seller score from paid receipts (success, latency, refunds), published with the epoch roots it was computed from. |
+| **Pool (payer privacy)** | `src/lib/pool.ts`, `src/lib/poolmath.ts` | Deposits are swept into rotating pool addresses and credited to an internal ledger; buys, refunds and withdrawals run from the pool, so the agent's own address never pays a seller. `/api/pool` lists the pool addresses. |
 | **Leash** | `src/lib/agents.ts` | Agent wallets (random keys, AES-GCM sealed in Postgres) with daily budget, per-call cap, allowlist and kill switch, all enforced server-side before money moves. |
 | **MCP server** | `mcp/server.mjs` | stdio MCP server so Claude, Cursor or any MCP client can browse the shop and buy with a leashed agent key. |
 
@@ -51,7 +52,8 @@ Epoch roots and anchor transactions are public at `/api/epochs`.
 
 ## Honest limits
 
-- **Privacy hides payee linkage, not the buyer.** One-time addresses hide which seller was paid and link calls together. The agent wallet that pays, and the amounts it sends, are visible on-chain. Fund agents from fresh wallets.
+- **Who pays whom is hidden, deposits are not.** Agents fund a per-agent deposit address that the server sweeps into a shared pool (`src/lib/pool.ts`, rotating `pool/v1/0..3` addresses, ledger in Postgres). Every buy is signed by a pool address and pays a one-time payee, so on-chain there is no agent → seller link. Still visible: that a deposit into HUSH happened, amounts and timing. With few users the pool offers weak cover.
+- **Custodial.** The operator holds the pool keys and the ledger. Withdrawals pay out from the pool to the owner.
 - **Not zero-knowledge.** Privacy comes from one-time addresses; verifiability comes from SHA-256 Merkle trees anchored with a memo. There are no ZK proofs here.
 - **Operator trust.** The HUSH operator holds `HUSH_SECRET`, which derives payee keys, agent key encryption and the publisher key.
 - **USDC path untested.** USDC payment verification is implemented but not tested end to end; USDC refunds are not implemented.

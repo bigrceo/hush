@@ -47,7 +47,13 @@ export async function payRequirement(conn: Connection, keypair: Keypair, req: Re
 
 export async function hushFetch(
   url: string,
-  o: { keypair: Keypair; rpcUrl: string; init?: RequestInit; approve?: (r: Requirement) => boolean | Promise<boolean> },
+  o: {
+    /** The paying keypair, or a function picking it once the 402 terms are known (e.g. from a pool). */
+    keypair: Keypair | ((r: Requirement) => Promise<Keypair> | Keypair);
+    rpcUrl: string;
+    init?: RequestInit;
+    approve?: (r: Requirement) => boolean | Promise<boolean>;
+  },
 ) {
   const first = await fetch(url, o.init);
   if (first.status !== 402) return { res: first, paid: null as null | { signature: string; requirement: Requirement } };
@@ -55,7 +61,8 @@ export async function hushFetch(
   const req = body.accepts[0];
   if (o.approve && !(await o.approve(req))) throw new Error("payment not approved by policy");
   const conn = new Connection(o.rpcUrl, "confirmed");
-  const signature = await payRequirement(conn, o.keypair, req);
+  const kp = typeof o.keypair === "function" ? await o.keypair(req) : o.keypair;
+  const signature = await payRequirement(conn, kp, req);
   const headers = new Headers(o.init?.headers);
   headers.set("x-payment", paymentHeader(req.extra.quote, signature));
   const res = await fetch(url, { ...o.init, headers });

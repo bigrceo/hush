@@ -171,18 +171,19 @@ export default async function Proof() {
                 <div>
                   <Label hush>Hidden</Label>
                   <ul className="mt-3 space-y-2 text-muted">
-                    <li>Which seller got paid: every call pays a fresh one-time address.</li>
-                    <li>Links between calls to the same seller.</li>
+                    <li>Who pays whom: buys are sent from shared HUSH pool addresses, never from the agent&apos;s own address, to a fresh one-time payee. Payer and payee are not linked on-chain.</li>
+                    <li>Links between calls to the same seller, or by the same agent.</li>
                     <li>Receipt contents: only a hash commitment is ever public.</li>
                   </ul>
                 </div>
                 <div>
                   <Label>Not hidden</Label>
                   <ul className="mt-3 space-y-2 text-muted">
-                    <li>The buyer&apos;s agent wallet and the amounts it sends. Fund agents from fresh wallets.</li>
-                    <li>That a payment happened. Solana is public.</li>
+                    <li>That a deposit into HUSH happened: agent deposit address to pool is visible.</li>
+                    <li>Amounts and timing of payments. Solana is public, and a small pool with few users gives weak cover.</li>
+                    <li>Custodial: the HUSH operator holds the pool keys and the internal ledger of who owns what.</li>
                     <li>Nothing here is zero-knowledge: privacy comes from one-time addresses, verifiability from Merkle roots anchored on-chain.</li>
-                    <li>The HUSH operator holds the key that derives payee addresses. USDC payments are untested.</li>
+                    <li>The operator also holds the key that derives payee addresses. Pool payments are SOL only for now.</li>
                   </ul>
                 </div>
               </div>
