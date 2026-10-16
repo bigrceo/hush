@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* HUSH — one brand colour (violet "hush"), everything else is ink on near-black.
+   Labels are bare mono caps, never tinted pills. Titles are two-tone: white + violet. */
+@theme {
+  --color-canvas: #07060a;
+  --color-surface: #0e0c13;
+  --color-raised: #15121c;
+  --color-card: #1b1724;
+  --color-line: #231f2d;
+  --color-fg: #f5f3fa;
+  --color-muted: #f5f3fa99;
+  --color-subtle: #f5f3fa59;
+  --color-hush: #9b7bff;
+  --color-hush-2: #c4b2ff;
+  --color-hush-deep: #4b2fd6;
+  --font-display: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, monospace;
+}
+
+html { background: var(--color-canvas); color-scheme: dark; }
+body { background: var(--color-canvas); color: var(--color-fg); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--color-hush); color: #07060a; }
+
+.label { font-family: var(--font-sans); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-subtle); }
+.label-hush { color: var(--color-hush); }
+.title { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.035em; line-height: .98; }
+.hush-text { color: var(--color-hush); }
+.card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: 18px; }
+.card-raised { background: var(--color-raised); border: 1px solid var(--color-line); border-radius: 14px; }
+.btn { display: inline-flex; align-items: center; gap: .5rem; height: 44px; padding: 0 20px; border-radius: 12px; font-weight: 600; font-size: 14px; transition: transform .15s, background .15s, border-color .15s; }
+.btn:active { transform: translateY(1px); }
+.btn-hush { background: var(--color-hush); color: #0b0812; box-shadow: 0 0 0 1px #ffffff22 inset, 0 10px 40px -10px #9b7bffaa; }
+.btn-hush:hover { background: var(--color-hush-2); }
+.btn-ghost { border: 1px solid var(--color-line); background: #ffffff05; }
+.btn-ghost:hover { border-color: #ffffff33; }
+.redact { background: var(--color-fg); color: transparent; border-radius: 3px; user-select: none; }
+.grid-bg { background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 50% 0%, #000 30%, transparent 75%); }
+.glow { background: radial-gradient(600px 300px at 50% 0%, #9b7bff40, transparent 70%); }
+.noise { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E"); }
+@keyframes scan { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } }
+.scan::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, #9b7bff33, transparent); animation: scan 2.6s infinite; }
+@keyframes blink { 50% { opacity: .2 } }
+.blink { animation: blink 1.2s infinite; }
+@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+.marquee { animation: marquee 40s linear infinite; }
+input, select, textarea { background: var(--color-raised); border: 1px solid var(--color-line); border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--color-hush); }
+.dots { background-image: radial-gradient(#ffffff1c 1px, transparent 1.2px); background-size: 14px 14px; }
+.dots::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, #9b7bff1f, transparent 65%); pointer-events: none; }
+
+/* Motion language: hover lift + border light on cards, shine sweep on primary buttons. */
+.card, .card-raised { transition: transform .45s cubic-bezier(.22,1,.36,1), border-color .45s, box-shadow .45s, background-color .45s; }
+.card:hover, .card-raised:hover { transform: translateY(-3px); border-color: #9b7bff55; box-shadow: 0 24px 60px -30px #9b7bff66; }
+.no-lift:hover { transform: none; }
+.btn, .pill { position: relative; overflow: hidden; }
+.btn-hush::before, .pill-white::before { content: ""; position: absolute; inset: 0; transform: translateX(-120%); background: linear-gradient(100deg, transparent 20%, #ffffff66 50%, transparent 80%); transition: transform .8s cubic-bezier(.22,1,.36,1); }
+.btn-hush:hover::before, .pill-white:hover::before { transform: translateX(120%); }
+.btn-ghost:hover, .pill-outline:hover { background: #ffffff0d; }
+.btn:hover { transform: translateY(-1px); }
+.marquee-mask { mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.title-dim { color: #f5f3fa73; }
+@media (prefers-reduced-motion: reduce) {
+  .marquee, .blink, .scan::after { animation: none !important; }
+  .card:hover, .card-raised:hover, .btn:hover { transform: none; }
+}
+.motion-ready .rv, .motion-ready .rg > * { opacity: 0; transform: translateY(22px); filter: blur(10px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1), filter .9s cubic-bezier(.22,1,.36,1); }
+.motion-ready .rv.in, .motion-ready .rg.in > * { opacity: 1; transform: none; filter: none; }
+.rg > *:nth-child(2) { transition-delay: .08s !important; } .rg > *:nth-child(3) { transition-delay: .16s !important; }
+.rg > *:nth-child(4) { transition-delay: .24s !important; } .rg > *:nth-child(5) { transition-delay: .32s !important; }
+.rg > *:nth-child(6) { transition-delay: .40s !important; } .rg > *:nth-child(n+7) { transition-delay: .48s !important; }
+.rg.in > * { transition-property: opacity, transform, filter, border-color, box-shadow !important; }
+.rg.in > *:hover { transition-delay: 0s !important; }
+
+/* Rolling button labels */
+.roll { display: inline-grid; overflow: hidden; height: 1.3em; line-height: 1.3em; }
+.roll > span { grid-area: 1 / 1; transition: transform .5s cubic-bezier(.22,1,.36,1); }
+.roll > span:last-child { transform: translateY(110%); }
+a:hover > .roll > span:first-child, button:hover > .roll > span:first-child { transform: translateY(-110%); }
+a:hover > .roll > span:last-child, button:hover > .roll > span:last-child { transform: translateY(0); }
+.marquee-mask:hover .marquee { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .roll > span { transition: none; } }

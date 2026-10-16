@@ -1,0 +1,17 @@
+import { DocLayout } from "@/components/doc";
+export const metadata = { title: "HUSH Whitepaper" };
+export default function Whitepaper() {
+  return (
+    <DocLayout kicker="Whitepaper · v0.1" title="Agents pay each other" hush="in private." intro="x402 gave machines a way to pay per request. It also turned every agent's shopping list into a public ledger. HUSH keeps the payments and removes the trail."
+      sections={[
+        { id: "problem", title: "What an agent buys is its strategy", body: <p>A trading agent that buys pool depth for one token every minute is telling the world what it is about to trade. A research agent that buys the same three feeds reveals its edge. On a transparent chain, plain x402 leaks the buyer, the seller, the amount and the cadence of every call.</p> },
+        { id: "design", title: "Design", body: <><p>HUSH keeps the x402 shape (HTTP 402, payment requirements, retry with proof) and changes who gets paid. Each call carries a fresh nonce. For each seller leg the gate derives a one-time ed25519 keypair from its secret and the nonce, and asks to be paid there. Addresses never repeat, so calls cannot be clustered by payee.</p><p>Receipts are kept off-chain and published only as commitments. Every hour the new commitments become the leaves of a SHA-256 Merkle tree, and its root is anchored on Solana in an SPL Memo signed by the HUSH publisher key. Any receipt holder can prove inclusion with a short Merkle path, checked in the browser at /verify, without revealing any other receipt. Reputation is computed from receipts and published with the epoch roots it came from: verifiable by anyone holding the receipts, opaque to everyone else. This is hashing and on-chain anchoring, not zero-knowledge cryptography.</p></> },
+        { id: "settlement", title: "Settlement & escrow", body: <p>Funds wait on the one-time address until the seller returns a valid answer. A failed call is refunded from that address. Sellers sweep at their own pace, batching and delaying sweeps to break timing links. SOL and USDC are supported from day one.</p> },
+        { id: "leash", title: "Leash", body: <p>Autonomy needs limits. Each agent wallet has a daily budget, a per-call cap, an allowlist and a kill switch, checked before money moves. Owners keep custody of the top-up and can sweep back at any time.</p> },
+        { id: "gdp", title: "Agent GDP", body: <p>The sum of everything machines pay machines on HUSH. Shown as one aggregate, never broken down by wallet or seller.</p> },
+        { id: "token", title: "$HUSH", body: <p>$HUSH launches on pump.fun. A share of facilitator fees buys $HUSH and burns it. Holders get tiered fee discounts, more shop slots and priority routing. Contract address: soon.</p> },
+        { id: "roadmap", title: "Roadmap", body: <ul className="list-disc space-y-2 pl-5"><li>Now: devnet gate, shop, leash, receipts, MCP server.</li><li>Next: mainnet, persistent receipts, seller sweeps with delayed batching, USDC refunds.</li><li>Then: verifiable Hush Score audits over receipt sets, confidential amounts, desktop and mobile apps.</li></ul> },
+        { id: "risks", title: "Limits & risks", body: <p>Stealth payees hide links between calls, not the buyer&apos;s own wallet; agents should be funded through fresh wallets. The gate operator holds the derivation secret. Nothing here is financial advice.</p> },
+      ]} />
+  );
+}

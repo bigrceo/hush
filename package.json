@@ -1,0 +1,36 @@
+{
+  "name": "hush",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 4048",
+    "build": "next build",
+    "start": "next start -p 4048",
+    "mcp": "node mcp/server.mjs",
+    "demo:agent": "node examples/agent-buy.mjs",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "test": "node --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "@neondatabase/serverless": "^1.2.0",
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.99.0",
+    "bs58": "^6.0.0",
+    "motion": "^12.43.0",
+    "next": "16.3.8",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "tweetnacl": "^1.0.3",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "playwright-core": "1.59",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

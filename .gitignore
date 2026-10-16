@@ -1,0 +1,17 @@
+node_modules
+.next
+.open-next
+.wrangler
+.dev.vars
+.env*.local
+next-env.d.ts
+tsconfig.tsbuildinfo
+.DS_Store
+screenshots/ref/
+.vercel
+.env*
+.agents/
+.claude/
+.vercel
+screenshots/ref-flowra/
+.secrets
