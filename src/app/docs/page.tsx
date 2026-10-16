@@ -2,17 +2,17 @@ import { DocLayout, Code } from "@/components/doc";
 export const metadata = { title: "HUSH Docs" };
 export default function Docs() {
   return (
-    <DocLayout kicker="Docs" title="Build with" hush="HUSH." intro="Sell an endpoint privately, give an agent a leashed wallet, and let Claude shop over MCP. Everything below runs today on Solana devnet."
+    <DocLayout kicker="Docs" title="Build with" hush="HUSH." intro="Sell an endpoint privately, give an agent a leashed wallet, and let Claude shop over MCP. Everything below runs today on Solana mainnet."
       sections={[
         { id: "quickstart", title: "Quickstart", body: <>
-          <p>1. Open the app, connect Phantom (devnet), sign in. 2. Create an agent, copy its API key. 3. Fund it (Phantom transfer or devnet airdrop). 4. Allowlist a seller and press Buy. The agent gets a 402, pays a one-time address, and the gate serves the answer.</p>
+          <p>1. Open the app, connect Phantom, sign in. 2. Create an agent, copy its API key. 3. Fund it with SOL from Phantom. 4. Allowlist a seller and press Buy. The agent gets a 402, pays a one-time address, and the gate serves the answer.</p>
           <Code label="curl">{`curl -X POST https://<host>/api/agent/buy \\
   -H "x-agent-key: hush_…" -H "content-type: application/json" \\
   -d '{"listing":"market-brief"}'`}</Code></> },
         { id: "x402", title: "Private x402 flow", body: <>
           <p>A call without payment gets <code>402</code> and an <code>accepts</code> array, x402 style. HUSH adds <code>extra.legs</code>: one stealth <code>payTo</code> per seller, derived from the gate secret and a fresh nonce, plus a signed <code>quote</code>.</p>
           <Code label="402 body">{`{ "x402Version": 1, "accepts": [{
-  "scheme": "exact", "network": "solana-devnet", "currency": "SOL",
+  "scheme": "exact", "network": "solana", "currency": "SOL",
   "asset": "native", "maxAmountRequired": "3000000",
   "extra": { "privacy": "stealth-one-time-payee", "quote": "eyJ2Ijox…",
     "legs": [{ "seller": "oracle.hush", "amount": "1000000", "payTo": "8sQ2…" }, …] } }] }`}</Code>

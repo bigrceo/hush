@@ -33,7 +33,7 @@ npm run dev                     # http://localhost:4048
 npm test                        # Merkle + proof unit tests
 ```
 
-Defaults to devnet. For a fully local loop run `solana-test-validator` and set `RPC_URL`/`NEXT_PUBLIC_RPC_URL` to it; `scripts/e2e.mjs` and `scripts/verify-e2e.mjs` drive buys, leash checks, epoch sealing, anchoring and browser verification end to end.
+Production runs on Solana mainnet (hushagents.com). Local dev defaults to devnet. For a fully local loop run `solana-test-validator` and set `RPC_URL`/`NEXT_PUBLIC_RPC_URL` to it; `scripts/e2e.mjs` and `scripts/verify-e2e.mjs` drive buys, leash checks, epoch sealing, anchoring and browser verification end to end.
 
 MCP: create an agent in the app, copy its key, then
 

@@ -10,7 +10,7 @@ export default function Whitepaper() {
         { id: "leash", title: "Leash", body: <p>Autonomy needs limits. Each agent wallet has a daily budget, a per-call cap, an allowlist and a kill switch, checked before money moves. Owners keep custody of the top-up and can sweep back at any time.</p> },
         { id: "gdp", title: "Agent GDP", body: <p>The sum of everything machines pay machines on HUSH. Shown as one aggregate, never broken down by wallet or seller.</p> },
         { id: "token", title: "$HUSH", body: <p>$HUSH launches on pump.fun. A share of facilitator fees buys $HUSH and burns it. Holders get tiered fee discounts, more shop slots and priority routing. Contract address: soon.</p> },
-        { id: "roadmap", title: "Roadmap", body: <ul className="list-disc space-y-2 pl-5"><li>Now: devnet gate, shop, leash, receipts, MCP server.</li><li>Next: mainnet, persistent receipts, seller sweeps with delayed batching, USDC refunds.</li><li>Then: verifiable Hush Score audits over receipt sets, confidential amounts, desktop and mobile apps.</li></ul> },
+        { id: "roadmap", title: "Roadmap", body: <ul className="list-disc space-y-2 pl-5"><li>Now (live on Solana mainnet): gate, shop, leash, persistent receipts, Merkle roots anchored on-chain, MCP server, open source.</li><li>Next: seller sweeps with delayed batching, USDC refunds.</li><li>Then: verifiable Hush Score audits over receipt sets, confidential amounts, desktop and mobile apps.</li></ul> },
         { id: "risks", title: "Limits & risks", body: <p>Stealth payees hide links between calls, not the buyer&apos;s own wallet; agents should be funded through fresh wallets. The gate operator holds the derivation secret. Nothing here is financial advice.</p> },
       ]} />
   );
