@@ -1,0 +1,62 @@
+{
+  "name": "hush-gate",
+  "version": "0.1.0",
+  "description": "Private x402 middleware for Solana: sell any endpoint per call in SOL or USDC, every call paid to a one-time stealth address. Web Request/Response, works in Next.js, Hono, Workers, Bun.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/mod.cjs",
+  "module": "./dist/mod.js",
+  "types": "./dist/mod.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/mod.d.ts",
+      "import": "./dist/mod.js",
+      "require": "./dist/mod.cjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js",
+      "require": "./dist/client.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup src/mod.ts src/client.ts --format esm,cjs --dts --clean",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "x402",
+    "solana",
+    "payments",
+    "ai-agents",
+    "privacy",
+    "stealth-address",
+    "mcp",
+    "middleware"
+  ],
+  "homepage": "https://hushagents.com/docs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bigrceo/hush.git",
+    "directory": "packages/hush-gate"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.99.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsup": "^8.5.0",
+    "typescript": "^5"
+  }
+}

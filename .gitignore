@@ -15,3 +15,4 @@ screenshots/ref/
 .vercel
 screenshots/ref-flowra/
 .secrets
+packages/*/dist

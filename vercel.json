@@ -1,4 +1,22 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [{ "path": "/api/cron/epoch", "schedule": "0 * * * *" }]
+  "crons": [
+    {
+      "path": "/api/cron/epoch",
+      "schedule": "0 * * * *"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "page.hushagents.com"
+        }
+      ],
+      "destination": "https://hushagents.com/:path*",
+      "permanent": true
+    }
+  ]
 }

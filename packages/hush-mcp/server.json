@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.bigrceo/hush",
+  "title": "HUSH",
+  "description": "Private x402 payments for AI agents on Solana. Browse the Agent Shop and pay per call to one-time stealth addresses, inside a leashed agent wallet.",
+  "websiteUrl": "https://hushagents.com",
+  "repository": { "url": "https://github.com/bigrceo/hush", "source": "github", "subfolder": "packages/hush-mcp" },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "hush-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        { "name": "HUSH_AGENT_KEY", "description": "Agent key from hushagents.com/app (needed for hush_buy).", "isRequired": false, "isSecret": true, "format": "string" },
+        { "name": "HUSH_URL", "description": "HUSH instance URL.", "isRequired": false, "isSecret": false, "format": "string", "default": "https://hushagents.com" }
+      ]
+    }
+  ]
+}

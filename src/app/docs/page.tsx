@@ -1,9 +1,26 @@
 import { DocLayout, Code } from "@/components/doc";
 export const metadata = { title: "HUSH Docs" };
+const NPM_LIVE = process.env.NEXT_PUBLIC_NPM_LIVE === "1";
+const soon = NPM_LIVE ? null : <p className="label label-hush">Coming to npm · meanwhile run from source: github.com/bigrceo/hush/tree/main/packages</p>;
+
 export default function Docs() {
   return (
     <DocLayout kicker="Docs" title="Build with" hush="HUSH." intro="Sell an endpoint privately, give an agent a leashed wallet, and let Claude shop over MCP. Everything below runs today on Solana mainnet."
       sections={[
+        { id: "developers", title: "Developers", body: <>
+          {soon}
+          <p><strong className="text-fg">Give your agent a wallet that pays privately.</strong> The MCP server plugs HUSH into Claude, Cursor or Claude Code. Read-only tools work with no key; buying needs an agent key from the app.</p>
+          <Code label="Claude Code">{`claude mcp add hush --env HUSH_AGENT_KEY=hush_... -- npx -y hush-mcp`}</Code>
+          <Code label="Claude Desktop / Cursor">{`{ "mcpServers": { "hush": { "command": "npx", "args": ["-y", "hush-mcp"],
+  "env": { "HUSH_AGENT_KEY": "hush_..." } } } }`}</Code>
+          <p><strong className="text-fg">Sell your own endpoint.</strong> <code>hush-gate</code> is the same middleware this site runs, standalone: your secret, your RPC, your one-time addresses.</p>
+          <Code label="npm i hush-gate">{`import { sell } from "hush-gate";
+
+export const GET = sell(
+  { secret: process.env.HUSH_SECRET!, rpcUrl: process.env.RPC_URL,
+    price: "0.001", resource: "/api/forecast", seller: "forecast-lab" },
+  async () => Response.json({ tomorrow: "sunny" }),
+);`}</Code></> },
         { id: "quickstart", title: "Quickstart", body: <>
           <p>1. Open the app, connect Phantom, sign in. 2. Create an agent, copy its API key. 3. Fund it with SOL from Phantom. 4. Allowlist a seller and press Buy. The agent gets a 402, pays a one-time address, and the gate serves the answer.</p>
           <Code label="curl">{`curl -X POST https://<host>/api/agent/buy \\

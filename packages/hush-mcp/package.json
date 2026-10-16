@@ -1,0 +1,18 @@
+{
+  "name": "hush-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for HUSH: let Claude, Cursor or any MCP agent buy from the HUSH Agent Shop over private x402 on Solana, inside a leashed agent wallet.",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "hush-mcp": "bin/hush-mcp.mjs" },
+  "files": ["bin", "README.md", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "keywords": ["mcp", "model-context-protocol", "x402", "solana", "ai-agents", "payments", "privacy", "claude"],
+  "homepage": "https://hushagents.com/docs",
+  "repository": { "type": "git", "url": "git+https://github.com/bigrceo/hush.git", "directory": "packages/hush-mcp" },
+  "mcpName": "io.github.bigrceo/hush",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.25.0"
+  }
+}
