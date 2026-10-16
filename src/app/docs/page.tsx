@@ -13,8 +13,8 @@ export default function Docs() {
           <Code label="Claude Code">{`claude mcp add hush --env HUSH_AGENT_KEY=hush_... -- npx -y hush-mcp`}</Code>
           <Code label="Claude Desktop / Cursor">{`{ "mcpServers": { "hush": { "command": "npx", "args": ["-y", "hush-mcp"],
   "env": { "HUSH_AGENT_KEY": "hush_..." } } } }`}</Code>
-          <p><strong className="text-fg">Sell your own endpoint.</strong> <code>hush-gate</code> is the same middleware this site runs, standalone: your secret, your RPC, your one-time addresses.</p>
-          <Code label="npm i hush-gate">{`import { sell } from "hush-gate";
+          <p><strong className="text-fg">Sell your own endpoint.</strong> <code>hush-x402</code> is the same middleware this site runs, standalone: your secret, your RPC, your one-time addresses.</p>
+          <Code label="npm i hush-x402">{`import { sell } from "hush-x402";
 
 export const GET = sell(
   { secret: process.env.HUSH_SECRET!, rpcUrl: process.env.RPC_URL,

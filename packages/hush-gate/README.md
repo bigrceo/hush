@@ -1,18 +1,18 @@
-# hush-gate
+# hush-x402
 
 Private x402 middleware for Solana. Sell any HTTP endpoint per call in SOL or USDC. Every call pays a **fresh one-time stealth address** derived from your secret, so nobody watching the chain can link your buyers' calls together or count your customers.
 
 Works anywhere with Web `Request`/`Response`: Next.js route handlers, Hono, Cloudflare Workers, Bun, Deno.
 
 ```bash
-npm i hush-gate
+npm i hush-x402
 ```
 
 ## Sell an endpoint for SOL (10 lines)
 
 ```ts
 // app/api/forecast/route.ts (Next.js)
-import { sell } from "hush-gate";
+import { sell } from "hush-x402";
 
 export const GET = sell(
   { secret: process.env.HUSH_SECRET!, rpcUrl: process.env.RPC_URL, price: "0.001", resource: "/api/forecast", seller: "forecast-lab" },
@@ -34,7 +34,7 @@ Funds stay on the one-time addresses until you sweep them: `stealthKeypair(secre
 ## Paying as an agent
 
 ```ts
-import { hushFetch } from "hush-gate/client";
+import { hushFetch } from "hush-x402/client";
 const { res } = await hushFetch("https://seller.example/api/forecast", { keypair, rpcUrl });
 ```
 

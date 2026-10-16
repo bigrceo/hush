@@ -1,5 +1,5 @@
 {
-  "name": "hush-gate",
+  "name": "hush-x402",
   "version": "0.1.0",
   "description": "Private x402 middleware for Solana: sell any endpoint per call in SOL or USDC, every call paid to a one-time stealth address. Web Request/Response, works in Next.js, Hono, Workers, Bun.",
   "license": "MIT",
@@ -44,7 +44,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bigrceo/hush.git",
-    "directory": "packages/hush-gate"
+    "directory": "packages/hush-x402"
   },
   "engines": {
     "node": ">=18"

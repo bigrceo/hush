@@ -23,6 +23,24 @@ export default function Home() {
           </div>
         </section>
 
+        {/* IN PLAIN WORDS */}
+        <section className="mx-auto max-w-[1240px] px-4 pt-24 sm:px-6">
+          <p className="label label-hush">In plain words</p>
+          <div className="rg mt-8 grid gap-4 md:grid-cols-3">
+            {[
+              ["1", "Your AI agent buys information.", "Prices, data, answers. It pays a little crypto for each one, on its own."],
+              ["2", "Normally, everyone sees who it paid.", "Every crypto payment is public. Anyone can watch what your agent buys and copy it."],
+              ["3", "With HUSH, nobody can.", "Each payment goes to a brand new address, used once. Same payment, no trail."],
+            ].map(([n, t, d]) => (
+              <div key={n} className="card rounded-[20px] border border-line bg-surface p-7">
+                <p className="title text-[44px] leading-none text-hush">{n}</p>
+                <p className="title mt-5 text-[26px] leading-tight">{t}</p>
+                <p className="mt-3 text-[16px] leading-relaxed text-muted">{d}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* 01 PRIVATE X402 */}
         <section className="mx-auto max-w-[1240px] px-4 py-28 sm:px-6">
           <SectionHead n="01" tag="Private payments / x402" title="Agentic payments," hush="minus the trail." sub="x402 made agents pay per call. It also made every purchase public. HUSH shields it, so copy-traders can't see you." />

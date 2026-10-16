@@ -6,11 +6,11 @@ Everything below is ready to paste. Publish the npm packages first (the registry
 
 ```bash
 npm login                                   # once
-cd packages/hush-gate && npm publish        # runs build + tests first (prepublishOnly)
+cd packages/hush-x402 && npm publish        # runs build + tests first (prepublishOnly)
 cd ../hush-mcp && npm publish
 ```
 
-Names checked free on 2026-10-16: `hush-mcp`, `hush-gate` (fallbacks also free: `@hushagents/mcp`, `@hushagents/gate`; if you switch to them, rename in package.json and use `npm publish --access public`). After publishing, set `NEXT_PUBLIC_NPM_LIVE=1` on Vercel production and redeploy so /docs drops the "coming to npm" note.
+Names checked free on 2026-10-16: `hush-mcp`, `hush-x402` (fallbacks also free: `@hushagents/mcp`, `@hushagents/gate`; if you switch to them, rename in package.json and use `npm publish --access public`). After publishing, set `NEXT_PUBLIC_NPM_LIVE=1` on Vercel production and redeploy so /docs drops the "coming to npm" note.
 
 ## 1. Official MCP Registry (registry.modelcontextprotocol.io)
 

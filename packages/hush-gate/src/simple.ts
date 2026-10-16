@@ -23,7 +23,7 @@ const USDC = { "mainnet-beta": "EPjFWdd5AufqSSqeM2qZqWAquxHnWsZXsP6ehNkN5Mkj6", 
 /** One-call helper: wrap a Web `Request => Response` handler so each call costs `price`, paid privately. */
 export function sell(o: SellOptions, handler: (req: Request, ctx: { payer: string; nonce: string }) => Promise<Response>) {
   const cluster = o.cluster ?? "mainnet-beta";
-  if (!o.secret || o.secret.length < 32) throw new Error("hush-gate: `secret` must be at least 32 characters");
+  if (!o.secret || o.secret.length < 32) throw new Error("hush-x402: `secret` must be at least 32 characters");
   return hushGate(
     {
       resource: o.resource,
