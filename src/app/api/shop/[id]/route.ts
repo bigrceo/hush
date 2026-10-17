@@ -1,5 +1,6 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getMint } from "@solana/spl-token";
+import { scanToken } from "@/lib/tokenscan";
 import { listing } from "@/lib/shop";
 import { gateFor } from "@/lib/gate";
 import { RPC_URL, CLUSTER } from "@/lib/config";
@@ -32,6 +33,7 @@ const handlers: Record<string, (u: URL) => Promise<unknown>> = {
     const [bal, sigs] = await Promise.all([c.getBalance(pk), c.getSignaturesForAddress(pk, { limit: 25 })]);
     return { address: pk.toBase58(), cluster: CLUSTER, sol: bal / 1e9, recentTxs: sigs.length, lastActive: sigs[0]?.blockTime ?? null };
   },
+  "token-scan": async (u) => scanToken(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
   "token-check": async (u) => {
     const m = await getMint(new Connection(RPC_URL), new PublicKey(u.searchParams.get("mint") || ""));
     return { mint: m.address.toBase58(), supply: m.supply.toString(), decimals: m.decimals, mintAuthority: m.mintAuthority?.toBase58() ?? null, freezeAuthority: m.freezeAuthority?.toBase58() ?? null };

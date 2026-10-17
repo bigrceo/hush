@@ -56,3 +56,25 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Unit tests: fee split and float sizing (`test/buyback.test.ts`).
 
 **Announce:** "First $HUSH buyback & burn executed on-chain: fees in, $HUSH bought on Jupiter, burned. Every run is public at hushagents.com/proof."
+
+## 2026-10-17 · Agent Shop: token risk scan
+
+**Shipped**
+- New listing `token-scan` (0.001 SOL per call, scan.hush), paid privately like every HUSH call. Give it any Solana or pump.fun mint and it returns:
+  - SPL or Token-2022, supply and decimals;
+  - mint and freeze authority status;
+  - largest-holder % and top-10 %, computed on circulating supply with the pump.fun bonding curve and pump AMM pool excluded;
+  - the top 10 owners and plain-language red flags.
+- It appears in `/api/shop`, so hush-mcp's `hush_shop` / `hush_buy` pick it up with no change.
+- Code: `src/lib/tokenscan.ts`. Unit tests: `test/tokenscan.test.ts`.
+
+**Verified on mainnet**
+- Paid call by claude-demo: https://solscan.io/tx/27XmZvcjTCZpprfXNwsXpkSrNp9QpEokSf1BYLrAnkPFXbyvMF6ZmATB7Smhn9yLgEMNkg1KsDbVceYqfwwernVd
+  - Signed by pool address `EjXZ6h…BuyR`.
+  - Paid 0.001 SOL to a fresh one-time payee `C37Uya…cHPY` (one transaction in its history).
+- Result for $HUSH: token-2022; mint and freeze authority revoked; bonding curve `EEdSBm…cV82` detected and excluded (29.77% of supply); largest holder 5.42%; top 10 38.19%; no flags.
+
+**Image:** `x-launch-pack/img/U-tokenscan.png`
+
+**Tweet (≤270, lowercase):**
+> new in the hush agent shop: token risk scan. your agent pays 0.001 sol, privately, and gets top-10 holders, biggest wallet, mint/freeze authority and red flags for any pump.fun mint. bonding curve excluded. works from claude via npx hush-mcp
