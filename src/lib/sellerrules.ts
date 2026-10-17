@@ -17,16 +17,23 @@ export type SellerInput = { name: string; url: string; priceSol: number; descrip
 export function validateSeller(x: SellerInput, blockedHosts: string[] = []): string | null {
   if (!x.name || x.name.trim().length < 3 || x.name.length > SELLER_LIMITS.nameMax) return `name must be 3-${SELLER_LIMITS.nameMax} chars`;
   if (!x.description || x.description.trim().length < 10 || x.description.length > SELLER_LIMITS.descMax) return `description must be 10-${SELLER_LIMITS.descMax} chars`;
+  const bad = checkHttpsUrl(x.url, blockedHosts);
+  if (bad) return bad;
+  const lamports = Math.round(x.priceSol * 1e9);
+  if (!Number.isFinite(lamports) || lamports < SELLER_LIMITS.minLamports || lamports > SELLER_LIMITS.maxLamports) return `price must be between ${SELLER_LIMITS.minLamports / 1e9} and ${SELLER_LIMITS.maxLamports / 1e9} SOL`;
+  if (x.input && !/^[a-z][a-z0-9_]{0,23}$/i.test(x.input)) return "input must be a simple parameter name";
+  return null;
+}
+
+/** Public https URL check (no credentials, default port, no private/loopback hosts). Returns an error or null. */
+export function checkHttpsUrl(url: string, blockedHosts: string[] = []): string | null {
   let u: URL;
-  try { u = new URL(x.url); } catch { return "url is not valid"; }
+  try { u = new URL(url); } catch { return "url is not valid"; }
   if (u.protocol !== "https:") return "url must be https";
   if (u.username || u.password) return "url must not contain credentials";
   if (u.port && u.port !== "443") return "url must use the default https port";
   const host = u.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (PRIVATE_HOST.test(host) || privateIp(host) || !host.includes(".")) return "url host is not allowed";
   if (blockedHosts.some((b) => host === b || host.endsWith("." + b))) return "url host is not allowed";
-  const lamports = Math.round(x.priceSol * 1e9);
-  if (!Number.isFinite(lamports) || lamports < SELLER_LIMITS.minLamports || lamports > SELLER_LIMITS.maxLamports) return `price must be between ${SELLER_LIMITS.minLamports / 1e9} and ${SELLER_LIMITS.maxLamports / 1e9} SOL`;
-  if (x.input && !/^[a-z][a-z0-9_]{0,23}$/i.test(x.input)) return "input must be a simple parameter name";
   return null;
 }

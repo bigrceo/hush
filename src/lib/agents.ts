@@ -12,6 +12,8 @@ import { ownerTier } from "./tiers";
 import { facilitatorFee } from "./feemath";
 import { TOKEN } from "./token";
 import { accrueFee } from "./pool";
+import { raiseAlert, getAlertSettings } from "./alerts";
+import { crossesBudget } from "./alertrules";
 
 /** Agent wallets are random keypairs; the secret key is stored AES-GCM-sealed in D1. */
 export async function agentKeypair(id: string): Promise<Keypair> {
@@ -111,6 +113,10 @@ export async function agentBuy(a: Agent, listingId: string, input: string | unde
     const sol = paid.requirement.currency === "SOL" ? +fromBase(BigInt(paid.requirement.maxAmountRequired), "SOL") : 0;
     if (res.ok) {
       await addSpend(a.id, sol);
+      const before = a.spent.day === today() ? a.spent.sol : 0;
+      const { pct } = await getAlertSettings(a.owner).catch(() => ({ pct: 80 }));
+      if (crossesBudget(before, before + sol, a.dailyBudget, pct))
+        await raiseAlert(a.owner, { kind: "budget", agentId: a.id, agentName: a.name, message: `reached ${pct}% of its daily budget (${(before + sol).toFixed(4)} / ${a.dailyBudget} SOL)` });
       if (fee > 0) await accrueFee(fee, paid.signature);
     }
     // Escrow refund goes back to the pool address that paid; credit the agent's ledger for it (fee included).

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import { GdpCounter, ScoreTable } from "@/components/live";
+import AlertsCard from "./alerts";
 import { detectWallets, INSTALL, onWalletsChange, type HushWallet } from "@/lib/wallets";
 
 const CLUSTER = process.env.NEXT_PUBLIC_CLUSTER || "devnet";
@@ -269,6 +270,8 @@ export default function Dapp() {
               </div>
               <div className="card p-6"><p className="label mb-4">Hush Score</p><ScoreTable /></div>
             </div>
+
+            {token && <AlertsCard token={token} />}
 
             <div className="card p-6">
               <p className="label">Activity</p>

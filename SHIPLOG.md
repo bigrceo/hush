@@ -134,3 +134,16 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Sweep to the seller wallet: https://solscan.io/tx/5WqaSaV3PTBF24dfaQ25pG4U4kW58kWT2zcBdPfxCTNBg6XRdR8Q595F7E7ZFi5JE9Q18bSUKMsyxF99J67SNn6x (0.000995 SOL after fee).
 
 **Image:** `x-launch-pack/updates/01-sellers.png`
+
+## 2026-10-17 · Leash alerts
+
+**Shipped**
+- New "Leash alerts" card in `/app`: set a webhook (Discord, Slack or any https URL) and a budget threshold (default 80%).
+- Alerts fire when an agent's spend crosses the threshold (once per day, on the crossing call), when the leash blocks a call (allowlist, per-call cap, daily budget, balance, frozen; same block at most once per 10 min), and when a per-agent or global kill switch flips.
+- Every alert is also kept in the app (last 30). One JSON body works for Discord (`content`), Slack (`text`) and generic receivers (`hush` object).
+- API: `GET/PUT /api/alerts`, `POST /api/alerts/test`. Migration `0006_alerts.sql`. Code: `src/lib/alerts.ts`, `src/lib/alertrules.ts`. Tests: `test/alerts.test.ts`.
+
+**Verified live**
+- Test alert, a blocked call (`wallet-scan` not on the allowlist), a budget crossing (demo agent at 0.006 / 0.006 SOL with a 90% threshold, paid call https://solscan.io/tx/3g3kWhYo3NmL7s6FeXufGU3Zt3DBbKYmaKKNpnduHLFEAGm54U411oSTGtMbS6krmAJsNuBbNtyvdrtUHDLbHCTS) and freeze/unfreeze all reached a test webhook with HTTP 2xx. Demo settings restored after the test.
+
+**Image:** `x-launch-pack/updates/02-leash-alerts.png`
