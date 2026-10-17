@@ -11,7 +11,7 @@ export function sharedHolders(a: { owner: string; pct: number }[], b: { owner: s
   return shared.sort((x, y) => y.pctA + y.pctB - (x.pctA + x.pctB));
 }
 
-async function topHolders(conn: Connection, mintStr: string) {
+export async function topHolders(conn: Connection, mintStr: string) {
   const mint = new PublicKey(mintStr);
   const supplyInfo = await conn.getTokenSupply(mint);
   const supply = Number(supplyInfo.value.amount);

@@ -4,11 +4,13 @@ import { scanToken } from "@/lib/tokenscan";
 import { devCheck } from "@/lib/devcheck";
 import { holderOverlap } from "@/lib/overlap";
 import { liquidityCheck } from "@/lib/liquidity";
+import { freshWallets } from "@/lib/freshwallets";
 import { findListing, getSeller, callUpstream } from "@/lib/sellers";
 import { gateFor } from "@/lib/gate";
 import { RPC_URL, CLUSTER } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 async function solPrice() {
   const [a, b] = await Promise.allSettled([
@@ -38,6 +40,7 @@ const handlers: Record<string, (u: URL) => Promise<unknown>> = {
   },
   "holder-overlap": async (u) => { const [a, b] = (u.searchParams.get("mint") || "").split(",").map((x) => x.trim()); return holderOverlap(new Connection(RPC_URL, "confirmed"), a, b); },
   "liquidity-check": async (u) => liquidityCheck(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
+  "fresh-wallets": async (u) => freshWallets(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
   "dev-check": async (u) => devCheck(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
   "token-scan": async (u) => scanToken(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
   "token-check": async (u) => {

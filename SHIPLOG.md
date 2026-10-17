@@ -202,3 +202,16 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Result: curve graduated, 30 pools, $9.16M liquidity, market cap 16.3x liquidity, no flags.
 
 **Image:** `x-launch-pack/updates/06-liquidity-check.png`
+
+## 2026-10-17 · Agent Shop: fresh-wallet ratio
+
+**Shipped**
+- New listing `fresh-wallets` (0.001 SOL per call, paid privately from the pool). Input: `mint`.
+- Takes the top 20 holders (pools, bonding curves and program accounts excluded), reads each owner's last 100 transactions and marks it fresh when it has 5 or fewer transactions or its first activity is under 7 days old. Returns per-holder tx count / age / % of circulating supply, fresh count and ratio, supply held by fresh wallets. Flags: 40%+ of top holders fresh, or fresh wallets holding 15%+.
+- Code: `src/lib/freshwallets.ts`, `src/lib/freshrules.ts`. Test: `test/fresh.test.ts`. Shop route `maxDuration` 60 s.
+
+**Verified on mainnet**
+- Paid call on GOAT: https://solscan.io/tx/339DnkmuBb9DwtSCy4SGa8mVrpP8qPo3E3ya7usy9sErYscRbQ2cc67yKEWFWhUd9LuAPTF4BZ5e4TLvJ9rnnCx7 (signed by pool address `2ciWp6…NXgS`), 14.3 s.
+- Result: 20 holders checked, 1 fresh / near-empty (0.98% of supply), no flags.
+
+**Image:** `x-launch-pack/updates/07-fresh-wallets.png`
