@@ -32,3 +32,27 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Screenshot: `screenshots/wallet-picker.png`.
 
 **Announce:** "HUSH now works with Solflare, Backpack and every Wallet Standard wallet, not just Phantom."
+
+## 2026-10-17 · Buyback & burn live
+
+**Shipped**
+- An hourly job (`/api/cron/buyback`, Vercel Cron at :30) splits accrued facilitator fees 50/50.
+  - Half buys $HUSH on Jupiter (SOL → $HUSH) and the tokens are burned with an SPL `burnChecked` (Token-2022, since $HUSH is a Token-2022 mint). The emptied token account is closed so its rent comes back.
+  - The other half goes to an ops account that pays network fees and the temporary token-account rent.
+- The job runs from a dedicated buyback wallet `3BZzbcZHeeVUawT3SGRoq3DyUd7mrpA7cvcuUBr11F84`, funded from the pool for each run. Leftovers go back to the pool.
+- Every run (SOL in, tokens burned, swap tx, burn tx) is stored in Postgres and is public at `/api/buyback`. /proof has a new "Buyback & burn" block with Solscan links.
+- Manual trigger: POST `/api/cron/buyback` with an admin token. Supports `dryRun` (quote only), a `threshold` override, and a float source. The default threshold is 0.002 SOL of buyback share.
+- If a swap doesn't land, its input goes back to the fee account. The swap is re-broadcast until it confirms or its blockhash expires.
+
+**Verified on mainnet** (first run, threshold lowered so the tiny fee balance could go through)
+- Swap: https://solscan.io/tx/5SmWWKiixrSk9a1TpzVWn5r7TcHwh88aQNnWhVdfFEBoTTHK7d9JiGbEEg9gBuQFRfHZVkVd65kxnuer3fBSEPt5. 0.00000125 SOL of fees → 5.076307 $HUSH via Pump.fun (Jupiter route), signed by the buyback wallet.
+- Burn: https://solscan.io/tx/sRK2DKvzfJxMdY8yBYTVc4QdDNx7L14pG1M6zGEroMYUiyrSz2Y4ra28p1tkrbrszXivi7qHiRMAa1fQfbB4xut. `burnChecked` 5.076307 $HUSH, then `closeAccount`.
+- $HUSH total supply dropped from 999,683,059.139141 to 999,683,054.062834, exactly 5.076307. The buyback wallet ends at 0 SOL.
+- The first two attempts failed safely (failed runs are listed in the API):
+  - Attempt 1: the float was too small for Pump.fun's accounts.
+  - Attempt 2: the swap expired before landing.
+  - Their SOL went back to the pool. One 2,500-lamport ledger mis-credit from attempt 2 was corrected by an `adjust` entry.
+- The temporary float came from the claude-demo agent. Its net cost over the three attempts was about 0.00137 SOL (network and priority fees, plus rent the DEX keeps for a per-user account).
+- Unit tests: fee split and float sizing (`test/buyback.test.ts`).
+
+**Announce:** "First $HUSH buyback & burn executed on-chain: fees in, $HUSH bought on Jupiter, burned. Every run is public at hushagents.com/proof."

@@ -5,6 +5,7 @@ import { LINKS, REPO, TEAM_WALLETS, TOKEN } from "@/lib/token";
 import { CLUSTER, RPC_URL } from "@/lib/config";
 import { listEpochs, publisherAddress } from "@/lib/epochs";
 import { agentGdp, d1 } from "@/lib/store";
+import { buybackState } from "@/lib/buyback";
 
 export const metadata = { title: "Proof · HUSH", description: "Open source, on-chain anchors, live usage and token facts for HUSH." };
 export const revalidate = 60;
@@ -48,6 +49,7 @@ function Empty({ children }: { children: React.ReactNode }) {
 }
 
 export default async function Proof() {
+  const bb = await safe(() => buybackState(), null);
   const [commit, epochs, publisher, gdp, recent] = await Promise.all([
     latestCommit(),
     safe(() => listEpochs(20), []),
@@ -139,7 +141,30 @@ export default async function Proof() {
               )}
             </Box>
 
-            <Box n="04" title="The" hush="token.">
+            <Box n="04" title="Buyback" hush="& burn.">
+              <p className="text-muted">Every hour, {Math.round(TOKEN.buybackShare * 100)}% of accrued facilitator fees buys $HUSH on Jupiter and the tokens are burned with an SPL burn. The other half pays network fees and ops. Every run is public at <a className="hush-text underline" href="/api/buyback">/api/buyback</a>.</p>
+              {!bb || bb.runs.filter((r) => r.status === "done").length === 0 ? (
+                <p className="mt-6 text-muted">No burn yet. Fees waiting: {(((bb?.pending.fees ?? 0)) / 1e9).toFixed(6)} SOL.</p>
+              ) : (
+                <>
+                  <div className="mt-6 grid gap-6 sm:grid-cols-3">
+                    <div><Label>SOL spent on $HUSH</Label><p className="title mt-2 text-3xl">{bb.totals.solIn.toFixed(6)}</p></div>
+                    <div><Label>$HUSH burned</Label><p className="title mt-2 text-3xl hush-text">{bb.totals.tokensBurned.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p></div>
+                    <div><Label>Runs</Label><p className="title mt-2 text-3xl">{bb.totals.runs}</p></div>
+                  </div>
+                  <ul className="mt-6 divide-y divide-line border-t border-line">
+                    {bb.runs.filter((r) => r.status === "done").slice(0, 10).map((r) => (
+                      <li key={String(r.id)} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                        <span>{when(r.at)} · {r.solIn.toFixed(6)} SOL → {(r.tokensBurned ?? 0).toLocaleString(undefined, { maximumFractionDigits: 2 })} $HUSH burned</span>
+                        <span className="flex gap-4">{r.swapSig && <a className="underline" href={tx(String(r.swapSig))} target="_blank" rel="noreferrer">Swap ↗</a>}{r.burnSig && <a className="hush-text underline" href={tx(String(r.burnSig))} target="_blank" rel="noreferrer">Burn ↗</a>}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </Box>
+
+            <Box n="05" title="The" hush="token.">
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
                 <CaChip />
                 {TOKEN.mint && <span className="break-all text-sm text-muted">{TOKEN.mint}</span>}
@@ -166,7 +191,7 @@ export default async function Proof() {
               </div>
             </Box>
 
-            <Box n="05" title="What HUSH hides," hush="and what it doesn't.">
+            <Box n="06" title="What HUSH hides," hush="and what it doesn't.">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
                   <Label hush>Hidden</Label>

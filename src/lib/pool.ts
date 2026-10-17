@@ -22,7 +22,7 @@ export async function poolBalances(kps?: Keypair[]) {
   return infos.map((i) => i?.lamports ?? 0);
 }
 
-async function ledger(agentId: string, kind: string, lamports: number, ref: string | null) {
+export async function ledger(agentId: string, kind: string, lamports: number, ref: string | null) {
   await (await d1()).prepare("INSERT INTO ledger (agent_id, kind, lamports, ref, at) VALUES (?, ?, ?, ?, ?)").bind(agentId, kind, lamports, ref, Date.now()).run();
 }
 
