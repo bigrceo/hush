@@ -189,3 +189,16 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Live verdict on each: "unlinkable: signed only by the shared HUSH pool, paid to address(es) with no history before this payment"; payer absent from payout tx. Anchored example: holder-overlap receipt, leaf 2 of 3 in epoch #8, path verified, memo tx `5fHubvQz…d5yg`. Fresh receipts join the next hourly epoch.
 
 **Image:** `x-launch-pack/updates/05-privacy-proof.png`
+
+## 2026-10-17 · Agent Shop: liquidity check
+
+**Shipped**
+- New listing `liquidity-check` (0.001 SOL per call, paid privately from the pool). Input: `mint`.
+- Decodes the pump.fun bonding curve (graduated or not, progress %, real SOL). For graduated or any SPL token, lists every DEX pool (DEX Screener public API, pump.fun curve excluded) with liquidity, 24h volume and creation date; total liquidity, market cap, market cap ÷ liquidity. Flags: no pool, liquidity under $10k, market cap over 50x liquidity.
+- Code: `src/lib/liquidity.ts`. Test: `test/liquidity.test.ts`.
+
+**Verified on mainnet**
+- Paid call on Fartcoin: https://solscan.io/tx/67jCqVAXt5bQXWiqZGceXeUswVLY1wxhxse6e26qGvBcXkUDH3U9dgvQwcDT59beKmdonwPbJg9ZPNKn3wFqxxic (signed by pool address `55m4NU…4ghg`).
+- Result: curve graduated, 30 pools, $9.16M liquidity, market cap 16.3x liquidity, no flags.
+
+**Image:** `x-launch-pack/updates/06-liquidity-check.png`
