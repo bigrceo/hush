@@ -147,3 +147,15 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Test alert, a blocked call (`wallet-scan` not on the allowlist), a budget crossing (demo agent at 0.006 / 0.006 SOL with a 90% threshold, paid call https://solscan.io/tx/3g3kWhYo3NmL7s6FeXufGU3Zt3DBbKYmaKKNpnduHLFEAGm54U411oSTGtMbS6krmAJsNuBbNtyvdrtUHDLbHCTS) and freeze/unfreeze all reached a test webhook with HTTP 2xx. Demo settings restored after the test.
 
 **Image:** `x-launch-pack/updates/02-leash-alerts.png`
+
+## 2026-10-17 · Receipts CSV export
+
+**Shipped**
+- "Export CSV" on the receipts card in `/app` and "Export sales CSV" on `/sell`.
+- `GET /api/receipts/export` (owner session): `role=buyer` (default, every receipt of your agents, with agent name) or `role=seller` (every paid call to your self-serve listings, with the sweep tx). Filters `from` / `to` (UTC days), `format=csv|json`.
+- Columns: time, agent / listing name, listing, paid or refunded, amount, currency, payment tx, refund tx, (sweep tx), latency, epoch, commitment, receipt id. Formula-looking cells are neutralised for spreadsheets. Code: `src/lib/csv.ts`, test `test/csv.test.ts`.
+
+**Verified live**
+- Buyer export for the demo owner: 10 receipts, `content-type: text/csv`, attachment filename; date filter on 2026-10-17 returns 7 rows; seller export lists the `s-17cdc8bf13` sale with its sweep tx; anonymous request → 401.
+
+**Image:** `x-launch-pack/updates/03-csv-export.png`

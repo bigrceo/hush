@@ -68,6 +68,7 @@ export default function Sell() {
             </div>
 
             {msg && <p className="mt-4 text-sm hush-text">{msg}</p>}
+            {sellers.length > 0 && <button onClick={() => act(async () => { const r = await fetch("/api/receipts/export?role=seller", { headers: { authorization: "Bearer " + token } }); if (!r.ok) throw new Error("export failed"); const u = URL.createObjectURL(await r.blob()); const a = document.createElement("a"); a.href = u; a.download = "hush-seller-receipts.csv"; a.click(); URL.revokeObjectURL(u); })} className="btn btn-ghost mt-6">Export sales CSV</button>}
 
             <div className="mt-6 space-y-4">
               {sellers.length === 0 && <p className="text-muted">No listings yet.</p>}

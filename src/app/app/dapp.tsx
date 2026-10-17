@@ -145,6 +145,16 @@ export default function Dapp() {
     say(`proof downloaded for ${r.listing} (epoch ${r.epochId})`);
   });
 
+  const exportCsv = () => run("export", async () => {
+    const res = await fetch("/api/receipts/export", { headers: { authorization: "Bearer " + token } });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || res.statusText);
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement("a");
+    a.href = url; a.download = `hush-receipts-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    say("receipts exported as CSV");
+  });
+
   const buy = (l: Listing) => run("buy", async () => {
     if (!agent) return;
     const input = l.input ? (inputs[l.id]?.trim() || (l.input === "address" ? agent.pubkey : "So11111111111111111111111111111111111111112")) : undefined;
@@ -257,7 +267,7 @@ export default function Dapp() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="card p-6">
-                <p className="label">Your private receipts</p>
+                <div className="flex items-center justify-between"><p className="label">Your private receipts</p>{receipts.length > 0 && <button onClick={exportCsv} className="label hush-text underline">Export CSV ↓</button>}</div>
                 <div className="mt-4 space-y-2 font-mono text-xs">
                   {receipts.length === 0 && <p className="text-subtle">None yet. Only you can see these.</p>}
                   {receipts.slice(0, 10).map((r) => (
