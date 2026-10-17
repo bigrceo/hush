@@ -169,3 +169,23 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 **Verified live** (17 Oct, 15:1x): 109 paid calls, 1 refund, 0.147 SOL, median 82 ms, 8 anchored epochs, 5.08 $HUSH burned, 9 listings (1 self-serve).
 
 **Image:** `x-launch-pack/updates/04-stats.png`
+
+## 2026-10-17 · Privacy proof, end to end
+
+**Why:** a payout on its own looks like a plain 0.001 SOL transfer, so the pool + one-time address privacy wasn't visible.
+
+**Shipped**
+- `/proof` section [00] "Privacy, end to end": the HUSH demo agent's latest paid calls (plus its latest call already sealed in an anchored root), each traced on purpose:
+  1. the agent's deposit tx into the shared pool,
+  2. the pool → one-time address payout tx (signer checked against the pool addresses),
+  3. the payout address had no history before the payment, and neither the agent's deposit address nor its owner wallet appears in the payout tx,
+  4. the receipt's Merkle path recomputed against the epoch root, with the SPL Memo anchor tx.
+  Only HUSH's own demo agent is traced; real users never are.
+- Unlinkability check anyone can run (form on `/proof`, `GET /api/privacy/check?tx=`): signers and whether each is a HUSH pool address, receivers and their prior history, HUSH receipt commitment / epoch, verdict. `GET /api/privacy/demo` returns the traced chains. Code: `src/lib/privacyproof.ts`.
+
+**Verified on mainnet**
+- Fresh top-up of the demo agent from its owner: https://solscan.io/tx/3agVr5q5a2AV5S5h3YR4iVMJYXPCoCBCxx33KwnSbwC7L2D7s9HihyguUjr9wdhaNQtwzkhg3zLGPJGcaDdXtbQk, swept into the pool (deposit tx `5DxDCwK8aj…`).
+- Three fresh paid calls from the pool: https://solscan.io/tx/3GNmUVtq8ra55vqwTpu5Jg2JiA7Aq5RDuivf4W8QfVPFdMTdD9YPFYSX2ysuXySuRc3KUn7chAaBdk6u9pUjWRDh , https://solscan.io/tx/4TjoHoyG2j2mKdWLy6wP5bLb48c9WKeQz6zkNSGK5EMd3uk4hepPy2ue9z1KZsrPJvUtTSf4ZvJRoWQ6ysJYuFXS , https://solscan.io/tx/2oBfARSbm1znVr1W7p5RBkrMuwegNxCsXN5atXJwiqMs9dvc82NFs6MEKQ1sXezpZe9ebSEQKYkMe3yZ4BKs3Hw
+- Live verdict on each: "unlinkable: signed only by the shared HUSH pool, paid to address(es) with no history before this payment"; payer absent from payout tx. Anchored example: holder-overlap receipt, leaf 2 of 3 in epoch #8, path verified, memo tx `5fHubvQz…d5yg`. Fresh receipts join the next hourly epoch.
+
+**Image:** `x-launch-pack/updates/05-privacy-proof.png`

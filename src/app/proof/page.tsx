@@ -6,6 +6,8 @@ import { CLUSTER, RPC_URL } from "@/lib/config";
 import { listEpochs, publisherAddress } from "@/lib/epochs";
 import { agentGdp, d1 } from "@/lib/store";
 import { buybackState } from "@/lib/buyback";
+import { demoChains } from "@/lib/privacyproof";
+import { PrivacyChecker } from "./privacy";
 
 export const metadata = { title: "Proof · HUSH", description: "Open source, on-chain anchors, live usage and token facts for HUSH." };
 export const revalidate = 60;
@@ -59,6 +61,7 @@ export default async function Proof() {
   ]);
   const balance = publisher ? await safe(async () => (await new Connection(RPC_URL, "confirmed").getBalance(new PublicKey(publisher))) / 1e9, null as number | null) : null;
   const anchored = epochs.filter((e) => e.anchorStatus === "anchored");
+  const demo = await safe(() => demoChains(3), { agent: null, chains: [] } as Awaited<ReturnType<typeof demoChains>>);
 
   return (
     <>
@@ -71,6 +74,28 @@ export default async function Proof() {
           <p className="mt-5 max-w-2xl text-lg text-muted">Source code, on-chain anchors, live usage and token facts. Everything on this page is read live, and every number links to where you can check it yourself.</p>
 
           <div className="mt-12 space-y-4">
+            <Box n="00" title="Privacy," hush="end to end.">
+              <p className="max-w-3xl text-sm text-muted">A HUSH payment is not one transfer. It is two unrelated transactions: an agent&apos;s deposit lands in a shared pool, and later a pool address pays a one-time address that never existed before. Below, the latest paid calls of our own demo agent ({demo.agent?.name ?? "claude-demo"}) plus its latest call already sealed in an anchored root, traced on purpose so you can follow both sides. Real users are never traced here: that link is exactly what HUSH keeps off-chain.</p>
+              <div className="mt-6 space-y-4">
+                {demo.chains.map((c) => {
+                  const chk = "error" in c.payout.check ? null : c.payout.check;
+                  const m = c.merkle as { pending?: boolean; epoch?: number; root?: string; leafIndex?: number; leafCount?: number; verified?: boolean; anchorTx?: string | null };
+                  return (
+                    <div key={c.payout.tx} className="card-raised p-5 text-sm">
+                      <div className="flex flex-wrap justify-between gap-2"><Label>{c.listing} · {c.amount} SOL</Label><Label>{when(c.at)}</Label></div>
+                      <ol className="mt-3 space-y-2">
+                        <li><b>1 · Deposit into the pool.</b> {c.deposit ? <>Agent deposit address <a className="underline" href={acct(c.deposit.from)} target="_blank" rel="noreferrer">{short(c.deposit.from)}</a> → shared pool, {(c.deposit.lamports / 1e9).toFixed(6)} SOL · <a className="hush-text underline" href={tx(c.deposit.tx)} target="_blank" rel="noreferrer">deposit tx ↗</a></> : "no earlier deposit recorded"}</li>
+                        <li><b>2 · Pool pays a one-time address.</b> {chk ? <>Signed by {chk.signers.map((x) => <a key={x.address} className="underline" href={acct(x.address)} target="_blank" rel="noreferrer">{short(x.address)}{x.hushPool ? " (HUSH pool)" : ""}</a>)} → {chk.receivers.map((r) => <a key={r.address} className="underline" href={acct(r.address)} target="_blank" rel="noreferrer">{short(r.address)}</a>)} · <a className="hush-text underline" href={tx(c.payout.tx)} target="_blank" rel="noreferrer">payout tx ↗</a></> : <a className="underline" href={tx(c.payout.tx)}>payout tx ↗</a>}</li>
+                        <li><b>3 · No link.</b> {chk && chk.receivers.every((r) => r.before === 0) ? "The one-time address had no history before this payment. " : ""}{c.payerNotInPayout ? "Neither the agent's deposit address nor its owner wallet appears anywhere in the payout transaction." : "Warning: the payer appears in the payout transaction."}</li>
+                        <li><b>4 · Receipt in an anchored root.</b> {m.pending ? "Sealed into the next hourly epoch; check back after the hour." : <>Leaf {m.leafIndex} of {m.leafCount} in epoch #{m.epoch}, root {short(m.root ?? "", 8)}, path {m.verified ? "verified" : "NOT verified"} on this server · {m.anchorTx ? <a className="hush-text underline" href={tx(m.anchorTx)} target="_blank" rel="noreferrer">memo anchor tx ↗</a> : "anchor pending"}</>}</li>
+                      </ol>
+                    </div>
+                  );
+                })}
+                {demo.chains.length === 0 && <p className="text-muted">No demo payments yet.</p>}
+              </div>
+              <PrivacyChecker cluster={CLUSTER} example={demo.chains[0]?.payout.tx} />
+            </Box>
             <Box n="01" title="Open" hush="source.">
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
