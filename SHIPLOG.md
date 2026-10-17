@@ -78,3 +78,26 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 
 **Tweet (≤270, lowercase):**
 > new in the hush agent shop: token risk scan. your agent pays 0.001 sol, privately, and gets top-10 holders, biggest wallet, mint/freeze authority and red flags for any pump.fun mint. bonding curve excluded. works from claude via npx hush-mcp
+
+## 2026-10-18 · Agent Shop: dev check
+
+**Shipped**
+- New listing `dev-check` (0.001 SOL per call, paid privately from the pool). Give it any pump.fun mint and it returns:
+  - the creator wallet (read from the bonding curve; for older curves that don't store it, from the fee payer of the token's create transaction, found through the metadata account);
+  - the dev's initial buy % (from the create tx) and current holding %;
+  - graduated or still on the curve;
+  - how many pump.fun coins the dev created in its last 60 transactions;
+  - flags: dev sold more than half, serial launcher, dev holds 10%+.
+- Code: `src/lib/devcheck.ts`. Tests: `test/devcheck.test.ts`.
+
+**Verified on mainnet**
+- First attempt: the dev's history contained a transaction format the client can't parse. The call failed and HUSH's escrow refunded it automatically (refund tx `sFMVi23V…miJS`). I fixed it to skip unreadable transactions.
+- Paid call on Fartcoin (`9BB6NF…gpump`): https://solscan.io/tx/4Fm8VkaEz8yexnko8ZtYfsUEykwT3LTPpFoKxsLe89LQGKx666cAk1TFEtYUqkJpaPnx6KwQY5mgWNaSCkWHRNm3
+  - Signed only by pool address `2mJik4…H6k7`.
+  - Paid 0.001 SOL to a one-time payee `6mE774…Hcsh`.
+- Result: creator `HyYNVY…nMFF`, created 2024-10-18 (create tx `4x9KdE…z9S`), initial buy 6.71%, holding now 0%, 0 launches in its last 60 transactions, graduated; flag "dev sold more than half".
+
+**Image:** `x-launch-pack/img/U-devcheck.png`
+
+**Tweet (≤270, lowercase):**
+> new in the hush agent shop: dev check. paste any pump.fun mint, your agent pays 0.001 sol privately and gets the creator wallet, its initial buy vs what it holds now, how many coins it launched lately, and a flag if it dumped. try it on your bags
