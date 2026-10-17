@@ -12,7 +12,7 @@ import { FEE } from "./poolmath";
 export interface Seller { id: string; owner: string; name: string; url: string; priceLamports: number; description: string; input: string | null; active: boolean; createdAt: number }
 type Row = { id: string; owner: string; name: string; url: string; price_lamports: string; description: string; input: string | null; active: number; created_at: string };
 const toSeller = (r: Row): Seller => ({ id: r.id, owner: r.owner, name: r.name, url: r.url, priceLamports: Number(r.price_lamports), description: r.description, input: r.input, active: !!r.active, createdAt: Number(r.created_at) });
-const BLOCKED = ["hushagents.com", "vercel.app", "hush-ashen.vercel.app"];
+export const BLOCKED = ["hushagents.com", "vercel.app", "hush-ashen.vercel.app"];
 
 export const sellerListingId = (id: string) => `s-${id}`;
 export const sellerLabel = (s: Seller) => `${s.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24)}.seller`;

@@ -238,3 +238,15 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Result: 1 cluster, top holder `EZ41…xjsJ` funded top holder `AMMg…P4kX`, together 12.97% of circulating supply, flagged.
 
 **Image:** `x-launch-pack/updates/09-bundle-check.png`
+
+## 2026-10-17 · Seller templates + endpoint test
+
+**Shipped**
+- `/sell` now opens with three starter endpoints to deploy and list: Token price (Cloudflare Worker, Jupiter price, `?mint=`), Wallet SOL balance (Vercel function, mainnet RPC, `?address=`), Your own signal (Python FastAPI, `?mint=`). Copy code, or "Use this template" to prefill name, price, description and input.
+- "Test endpoint" before listing: `POST /api/sellers/test {url, input?, value?}` (signed in) calls the endpoint exactly like the paid proxy (https only, private hosts and HUSH hosts refused, no redirects, 10 s timeout, 256 KB cap) and returns status, latency, size, JSON or not, a preview and the problems that would refund buyers.
+- Code: `src/app/sell/templates.ts`, `src/app/sell/sell.tsx`, `src/app/api/sellers/test/route.ts`.
+
+**Verified live**
+- `/sell` serves the template block. Test endpoint: Jupiter price URL → ok, HTTP 200, 46 ms, 218 bytes, JSON; an HTTP 500 URL → not ready, "answered HTTP 500: buyers would be refunded"; `hushagents.com` URL → refused (400). Unsigned call → 401.
+
+**Image:** `x-launch-pack/updates/10-seller-templates.png`

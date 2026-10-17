@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import bs58 from "bs58";
 import { detectWallets, INSTALL, type HushWallet } from "@/lib/wallets";
+import { TEMPLATES } from "./templates";
 
 type S = { id: string; name: string; url: string; priceSol: number; description: string; input: string | null; active: boolean; listingId: string; label: string; endpoint: string; earnings: { calls: number; earnedSol: number; unsweptSol: number; unswept: number; sweeps: string[] } };
 const CLUSTER = process.env.NEXT_PUBLIC_CLUSTER || "devnet";
@@ -16,6 +17,11 @@ export default function Sell() {
   const [form, setForm] = useState({ name: "", url: "", priceSol: "0.002", description: "", input: "" });
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [tpl, setTpl] = useState(TEMPLATES[0].id);
+  const [copied, setCopied] = useState(false);
+  const [sample, setSample] = useState("");
+  const [test, setTest] = useState<{ ok: boolean; status?: number; ms: number; bytes?: number; preview?: string; problems: string[] } | null>(null);
+  const t = TEMPLATES.find((x) => x.id === tpl)!;
 
   useEffect(() => { try { const t = sessionStorage.getItem("hush.token"), p = sessionStorage.getItem("hush.pk"); if (t && p) { setToken(t); setPk(p); } } catch {} setWallets(detectWallets()); }, []);
   const api = useCallback(async (path: string, init?: RequestInit) => {
@@ -47,6 +53,20 @@ export default function Sell() {
         <h1 className="title mt-4 text-5xl sm:text-7xl">Sell to agents, <span className="hush-text">per call.</span></h1>
         <p className="mt-5 max-w-2xl text-lg text-muted">List any https endpoint and a price in SOL. Agents pay over private x402, HUSH calls your endpoint and returns the answer. Every payment lands on a fresh one-time address; sweep your earnings to your wallet whenever you want.</p>
 
+
+        <div className="card no-lift mt-10 p-6 sm:p-8">
+          <p className="label">Start from a template</p>
+          <p className="mt-2 text-sm text-muted">Deploy one of these in a few minutes, paste its URL below, test it, list it.</p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {TEMPLATES.map((x) => <button key={x.id} onClick={() => { setTpl(x.id); setCopied(false); }} className={`btn ${tpl === x.id ? "btn-hush" : "btn-ghost"}`}>{x.name} · {x.host}</button>)}
+          </div>
+          <div className="mt-5 flex items-center justify-between gap-3"><p className="label">{t.file}</p>
+            <div className="flex gap-2">
+              <button onClick={() => { navigator.clipboard?.writeText(t.code).then(() => setCopied(true)).catch(() => {}); }} className="btn btn-ghost">{copied ? "Copied" : "Copy code"}</button>
+              {token && <button onClick={() => { setForm({ name: t.name, url: "", priceSol: t.priceSol, description: t.description, input: t.input }); setSample(t.sample); setTest(null); }} className="btn btn-hush">Use this template</button>}
+            </div></div>
+          <pre className="card-raised mt-3 overflow-x-auto p-4 text-xs leading-relaxed"><code>{t.code}</code></pre>
+        </div>
         {!token ? (
           <div className="card no-lift mt-10 p-8 text-center">
             <p className="title text-2xl">Connect the wallet that <span className="hush-text">gets paid.</span></p>
@@ -63,6 +83,11 @@ export default function Sell() {
                 <label className="flex flex-col gap-1 sm:col-span-2"><span className="label">Description</span><input value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="What the agent gets back" /></label>
                 <label className="flex flex-col gap-1"><span className="label">Optional input parameter</span><input value={form.input} onChange={(e) => setForm({ ...form, input: e.target.value })} placeholder="city" /></label>
               </div>
+              <div className="mt-4 flex flex-wrap items-end gap-3">
+                {form.input && <label className="flex flex-col gap-1"><span className="label">Sample {form.input}</span><input value={sample} onChange={(e) => setSample(e.target.value)} placeholder="value to test with" /></label>}
+                <button disabled={busy || !form.url} onClick={() => act(async () => { setTest(await api("/api/sellers/test", { method: "POST", body: JSON.stringify({ url: form.url, input: form.input, value: sample }) })); })} className="btn btn-ghost">Test endpoint</button>
+              </div>
+              {test && <div className="card-raised mt-4 p-4 text-sm"><p className={test.ok ? "hush-text" : "text-red-400"}>{test.ok ? "Ready to list" : "Not ready"}{test.status ? ` · HTTP ${test.status}` : ""} · {test.ms} ms{test.bytes != null ? ` · ${test.bytes} bytes` : ""}</p>{test.problems.map((p) => <p key={p} className="mt-1 text-muted">{p}</p>)}{test.preview && <pre className="mt-2 overflow-x-auto text-xs text-subtle">{test.preview}</pre>}</div>}
               <button disabled={busy} onClick={() => act(async () => { const j = await api("/api/sellers", { method: "POST", body: JSON.stringify({ ...form, priceSol: Number(form.priceSol), input: form.input || undefined }) }); setForm({ name: "", url: "", priceSol: "0.002", description: "", input: "" }); return `Listed as ${j.listingId}. Agents can buy it now.`; })} className="btn btn-hush mt-6">List endpoint</button>
               <p className="mt-3 text-xs text-muted">Price 0.001 to 0.1 SOL. HUSH adds a 1% facilitator fee on the buyer&apos;s side. Your endpoint must answer within 10 s with under 256 KB; if it fails, the buyer is refunded automatically. Max 5 listings per wallet.</p>
             </div>
