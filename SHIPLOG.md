@@ -101,3 +101,21 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 
 **Tweet (≤270, lowercase):**
 > new in the hush agent shop: dev check. paste any pump.fun mint, your agent pays 0.001 sol privately and gets the creator wallet, its initial buy vs what it holds now, how many coins it launched lately, and a flag if it dumped. try it on your bags
+
+## 2026-10-18 · Agent Shop: holder overlap
+
+**Shipped**
+- New listing `holder-overlap` (0.001 SOL per call, paid privately from the pool). Input: two mints as `mint=A,B`.
+- It compares the top 20 token accounts of each mint, excluding liquidity pools, pump.fun bonding curves and program-owned accounts, and returns the owners they share, ranked, with each one's % of circulating supply on both sides. It flags a likely cluster when 5 or more top holders overlap.
+- Code: `src/lib/overlap.ts`. Test: `test/overlap.test.ts`.
+
+**Verified on mainnet**
+- Paid call comparing Fartcoin and GOAT: https://solscan.io/tx/5EVkaWo2Ur5WnbTLS1F2NJLFV88GZoVTQ9uiDsbiEhyRKU9SM4zPXbTGemzT9PSkSTUw9Tj7VXZA6HXk25NK1VUz
+  - Signed only by pool address `2ciWp6…NXgS`.
+  - Paid 0.001 SOL to one-time payee `3iRVnZ…bunj`.
+- Result: 20 × 20 holders compared, 2 shared top holders (`u6PJ8D…q2w`, `5Q544f…e4j1`), holding 8.31% of Fartcoin and 8.04% of GOAT; no cluster flag. The two shared wallets are probably exchange hot wallets; the scan doesn't label them yet.
+
+**Image:** `x-launch-pack/img/U-overlap.png`
+
+**Tweet (≤270, lowercase):**
+> new in the hush agent shop: holder overlap. give your agent two mints, it pays 0.001 sol privately and gets the top wallets they share, pools excluded. same cluster behind two coins? now you know before you ape

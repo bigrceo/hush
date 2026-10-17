@@ -2,6 +2,7 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { getMint } from "@solana/spl-token";
 import { scanToken } from "@/lib/tokenscan";
 import { devCheck } from "@/lib/devcheck";
+import { holderOverlap } from "@/lib/overlap";
 import { listing } from "@/lib/shop";
 import { gateFor } from "@/lib/gate";
 import { RPC_URL, CLUSTER } from "@/lib/config";
@@ -34,6 +35,7 @@ const handlers: Record<string, (u: URL) => Promise<unknown>> = {
     const [bal, sigs] = await Promise.all([c.getBalance(pk), c.getSignaturesForAddress(pk, { limit: 25 })]);
     return { address: pk.toBase58(), cluster: CLUSTER, sol: bal / 1e9, recentTxs: sigs.length, lastActive: sigs[0]?.blockTime ?? null };
   },
+  "holder-overlap": async (u) => { const [a, b] = (u.searchParams.get("mint") || "").split(",").map((x) => x.trim()); return holderOverlap(new Connection(RPC_URL, "confirmed"), a, b); },
   "dev-check": async (u) => devCheck(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
   "token-scan": async (u) => scanToken(new Connection(RPC_URL, "confirmed"), u.searchParams.get("mint") || ""),
   "token-check": async (u) => {
