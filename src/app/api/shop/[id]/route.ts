@@ -3,7 +3,7 @@ import { getMint } from "@solana/spl-token";
 import { scanToken } from "@/lib/tokenscan";
 import { devCheck } from "@/lib/devcheck";
 import { holderOverlap } from "@/lib/overlap";
-import { listing } from "@/lib/shop";
+import { findListing, getSeller, callUpstream } from "@/lib/sellers";
 import { gateFor } from "@/lib/gate";
 import { RPC_URL, CLUSTER } from "@/lib/config";
 
@@ -51,10 +51,12 @@ const handlers: Record<string, (u: URL) => Promise<unknown>> = {
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const l = listing(id);
+  const l = await findListing(id);
   if (!l) return Response.json({ error: "unknown listing" }, { status: 404 });
+  const seller = id.startsWith("s-") ? await getSeller(id.slice(2)) : null;
   const gated = gateFor(l, async (r) => {
-    const data = await handlers[id](new URL(r.url));
+    // Self-serve listings are proxied to the seller's endpoint; a failure there triggers the escrow refund.
+    const data = seller ? await callUpstream(seller, new URL(r.url)) : await handlers[id](new URL(r.url));
     return Response.json({ listing: id, data });
   });
   return gated(req);

@@ -119,3 +119,18 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 
 **Tweet (≤270, lowercase):**
 > new in the hush agent shop: holder overlap. give your agent two mints, it pays 0.001 sol privately and gets the top wallets they share, pools excluded. same cluster behind two coins? now you know before you ape
+
+## 2026-10-17 · Self-serve sellers
+
+**Shipped**
+- `/sell`: connect a wallet, list any https GET endpoint with a price (0.001 to 0.1 SOL) and a description. It shows up in the Agent Shop as `s-<id>` right away.
+- Paid calls are proxied to the seller's endpoint (10 s timeout, 256 KB cap, no redirects, private/loopback hosts refused). If the endpoint fails, the gate's escrow refunds the buyer.
+- Earnings stay on the one-time payees until the seller clicks "Sweep": HUSH drains them to the seller's wallet, several per transaction. Pause / resume per listing, max 5 listings per wallet.
+- API: `GET/POST /api/sellers`, `PATCH /api/sellers/:id`, `POST /api/sellers/:id/sweep`. Agent leash allowlists accept seller listings. Migration `0005_sellers.sql`. Tests: `test/sellers.test.ts`.
+
+**Verified on mainnet**
+- Listed `s-17cdc8bf13` (SOL/USD spot from a public price API, 0.001 SOL) from the demo owner wallet.
+- Demo agent bought it: https://solscan.io/tx/4qT6ucCFzanFGsefrioHpNiN7jpiT9hX4yMFYgXyaScadygoVG63asr6XtDKbbb9Tjw71siGBCp14BpWU438KByi (pool address `EjXZ6h…uyR` → one-time payee), answer `{"amount":"103.895","base":"SOL","currency":"USD"}`.
+- Sweep to the seller wallet: https://solscan.io/tx/5WqaSaV3PTBF24dfaQ25pG4U4kW58kWT2zcBdPfxCTNBg6XRdR8Q595F7E7ZFi5JE9Q18bSUKMsyxF99J67SNn6x (0.000995 SOL after fee).
+
+**Image:** `x-launch-pack/updates/01-sellers.png`

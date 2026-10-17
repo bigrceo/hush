@@ -4,7 +4,8 @@ import { hushFetch, type Requirement } from "@/gate/client";
 import { fromBase } from "@/gate";
 import { HUSH_SECRET, RPC_URL } from "./config";
 import { addSpend, getAgent, getAgentSecrets, insertAgent, isFrozenAll, tagReceiptAgent, today, type Agent } from "./store";
-import { listing, listingTotal } from "./shop";
+import { listingTotal } from "./shop";
+import { findListing } from "./sellers";
 import { credit, debit, ledgerBalance, poolPayer, sweepDeposit } from "./pool";
 import { FEE } from "./poolmath";
 import { ownerTier } from "./tiers";
@@ -65,7 +66,7 @@ export async function checkLeash(a: Agent, listingId: string, amountSol: number)
 }
 
 export async function agentBuy(a: Agent, listingId: string, input: string | undefined, origin: string) {
-  const l = listing(listingId);
+  const l = await findListing(listingId);
   if (!l) throw new LeashError("unknown listing", 404);
   await checkLeash(a, l.id, listingTotal(l)); // pre-check with list price
   const url = new URL(`/api/shop/${l.id}`, origin);
