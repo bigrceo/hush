@@ -215,3 +215,13 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Result: 20 holders checked, 1 fresh / near-empty (0.98% of supply), no flags.
 
 **Image:** `x-launch-pack/updates/07-fresh-wallets.png`
+
+## 2026-10-17 · Python client
+
+**Shipped**
+- `packages/hush-py` (`hush-agents`, standard library only, Python 3.8+): `HushClient.listings()`, `.buy(listing, input)`, `.stats()`, `.privacy_check(tx)`; `HushError` with `status` and `blocked_by="leash"`; CLI `hush listings | buy | stats | check`. Install: `pip install "git+https://github.com/bigrceo/hush.git#subdirectory=packages/hush-py"`. Offline tests in `packages/hush-py/tests`. Python snippet in `/docs` Developers.
+
+**Verified on mainnet**
+- `python -m hush_agents buy sol-price` with the demo agent key: https://solscan.io/tx/3eFpZXcT5EMToLy8ncvuVe5Q23pKhzXFm1th7FFNmFaoQvPbt7CeEkWnpUN71D1nKgeLH9UBSmVV6aDAFtDyx8S7 (pool address `2mJik4…H6k7`), answer 104.035 USD.
+
+**Image:** `x-launch-pack/updates/08-python.png`

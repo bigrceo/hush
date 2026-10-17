@@ -13,6 +13,13 @@ export default function Docs() {
           <Code label="Claude Code">{`claude mcp add hush --env HUSH_AGENT_KEY=hush_... -- npx -y hush-mcp`}</Code>
           <Code label="Claude Desktop / Cursor">{`{ "mcpServers": { "hush": { "command": "npx", "args": ["-y", "hush-mcp"],
   "env": { "HUSH_AGENT_KEY": "hush_..." } } } }`}</Code>
+          <p><strong className="text-fg">Python.</strong> <code>hush-agents</code> has no dependencies: list the shop, buy within the leash, run the privacy check.</p>
+          <Code label="pip">{`pip install "git+https://github.com/bigrceo/hush.git#subdirectory=packages/hush-py"
+
+from hush_agents import HushClient
+hush = HushClient()   # HUSH_AGENT_KEY
+r = hush.buy("liquidity-check", "<mint>")
+print(r["paid"]["signature"], r["result"]["data"])`}</Code>
           <p><strong className="text-fg">Sell your own endpoint.</strong> <code>hush-x402</code> is the same middleware this site runs, standalone: your secret, your RPC, your one-time addresses.</p>
           <Code label="npm i hush-x402">{`import { sell } from "hush-x402";
 
