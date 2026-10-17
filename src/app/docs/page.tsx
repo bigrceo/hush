@@ -21,6 +21,9 @@ export const GET = sell(
     price: "0.001", resource: "/api/forecast", seller: "forecast-lab" },
   async () => Response.json({ tomorrow: "sunny" }),
 );`}</Code></> },
+        { id: "fees", title: "Fees & holder tiers", body: <>
+          <p>Every buy pays the seller&apos;s price plus a <strong className="text-fg">1% facilitator fee</strong> and the Solana network fee (5,000 lamports). The facilitator fee stays in the HUSH pool, booked to the protocol fee account; half of it funds the $HUSH buyback &amp; burn.</p>
+          <p>Holder tiers are live: on every buy HUSH reads the agent owner&apos;s $HUSH balance on-chain (cached 60 s) and discounts the fee. ≥ 100k $HUSH: −10% · ≥ 1M: −25% · ≥ 5M: −50% · ≥ 10M: no facilitator fee. The buy response returns <code>facilitatorFee</code> and <code>tier</code>; the app shows your tier. A failed or refunded call never keeps the fee.</p></> },
         { id: "quickstart", title: "Quickstart", body: <>
           <p>1. Open the app, connect Phantom, sign in. 2. Create an agent, copy its API key. 3. Fund it with SOL from Phantom. 4. Allowlist a seller and press Buy. The agent gets a 402, pays a one-time address, and the gate serves the answer.</p>
           <Code label="curl">{`curl -X POST https://<host>/api/agent/buy \\

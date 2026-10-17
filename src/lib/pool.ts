@@ -105,3 +105,15 @@ export async function sweepAllDeposits() {
   }
   return { agents: n, sol: lamports / 1e9 };
 }
+
+/** The protocol fee account lives in the ledger only; its lamports sit in the pool. */
+export const FEE_ACCOUNT = "__fees__";
+export async function accrueFee(lamports: number, ref: string) {
+  await ledger(FEE_ACCOUNT, "fee", lamports, ref);
+}
+export async function feeTotals() {
+  const r = await (await d1()).prepare(
+    "SELECT COALESCE(SUM(CASE WHEN kind = 'fee' THEN lamports END), 0) AS accrued, COALESCE(SUM(CASE WHEN kind <> 'fee' THEN -lamports END), 0) AS used, COUNT(*) FILTER (WHERE kind = 'fee') AS n FROM ledger WHERE agent_id = ?",
+  ).bind(FEE_ACCOUNT).first<{ accrued: string; used: string; n: string }>();
+  return { accrued: Number(r?.accrued ?? 0), used: Number(r?.used ?? 0), count: Number(r?.n ?? 0) };
+}

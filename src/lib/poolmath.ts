@@ -27,20 +27,21 @@ export function pickReceiver(balances: number[], amount: number, rand: number): 
   return ok[Math.floor(rand * ok.length) % ok.length];
 }
 
-/** Split a withdrawal across pool addresses. Returns [index, lamports to send] legs and what is left uncovered. */
+/** Split a withdrawal of a ledger balance across pool addresses. Each leg sends `take` and costs take + FEE
+ *  from the balance. Returns [index, lamports to send] legs and what is left uncovered. */
 export function planWithdraw(balances: number[], amount: number): { legs: [number, number][]; uncovered: number } {
   const legs: [number, number][] = [];
   let rest = amount;
   const order = balances.map((b, i) => [i, b] as const).sort((a, b) => b[1] - a[1]);
   for (const [i, b] of order) {
     if (rest <= 0) break;
-    if (b <= FEE) continue;
-    let take = Math.min(rest, b - FEE);
+    if (b <= FEE || rest <= FEE) continue;
+    let take = Math.min(rest - FEE, b - FEE); // the user's balance also pays this leg's network fee
     const left = b - take - FEE;
     if (left > 0 && left < RENT_MIN) take = b - FEE - RENT_MIN;
     if (take <= 0) continue;
     legs.push([i, take]);
-    rest -= take;
+    rest -= take + FEE;
   }
   return { legs, uncovered: Math.max(0, rest) };
 }

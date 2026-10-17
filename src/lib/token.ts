@@ -2,12 +2,13 @@
 export const TOKEN = {
   symbol: "$HUSH",
   mint: process.env.NEXT_PUBLIC_HUSH_MINT || "",
+  feeBps: 100, // facilitator fee on every buy, in basis points of the price (1%), before tier discount
   buybackShare: 0.5, // share of facilitator fees that buys and burns $HUSH
   tiers: [
-    { name: "Tier 1", min: 100_000, perk: "−10% fees" },
-    { name: "Tier 2", min: 1_000_000, perk: "−25% fees" },
-    { name: "Tier 3", min: 5_000_000, perk: "−50% fees" },
-    { name: "Tier 4", min: 10_000_000, perk: "zero fees" },
+    { name: "Tier 1", min: 100_000, perk: "−10% fees", discount: 0.1 },
+    { name: "Tier 2", min: 1_000_000, perk: "−25% fees", discount: 0.25 },
+    { name: "Tier 3", min: 5_000_000, perk: "−50% fees", discount: 0.5 },
+    { name: "Tier 4", min: 10_000_000, perk: "zero fees", discount: 1 },
   ],
 };
 

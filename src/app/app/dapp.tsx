@@ -27,6 +27,7 @@ export default function Dapp() {
   const [token, setToken] = useState<string | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [frozenAll, setFrozenAll] = useState(false);
+  const [holder, setHolder] = useState<{ hush: number; tier: string | null; perk: string | null; feePct: number; next: { name: string; min: number } | null } | null>(null);
   const [sel, setSel] = useState<string | null>(null);
   const [listings, setListings] = useState<Listing[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -49,6 +50,7 @@ export default function Dapp() {
     const j = await api("/api/agents");
     setAgents(j.agents);
     setFrozenAll(j.frozenAll);
+    setHolder(j.holder ?? null);
     setSel((s) => s ?? j.agents[0]?.id ?? null);
     setReceipts((await api("/api/receipts")).receipts);
   }, [api, token]);
@@ -139,7 +141,7 @@ export default function Dapp() {
     const input = l.input ? (inputs[l.id]?.trim() || (l.input === "address" ? agent.pubkey : "So11111111111111111111111111111111111111112")) : undefined;
     say(`${agent.name} → 402 → paying ${l.total} ${l.currency} privately for ${l.id}…`);
     const j = await api("/api/agent/buy", { method: "POST", body: JSON.stringify({ agentId: agent.id, listing: l.id, input }) });
-    say(`${j.ok ? "PAID" : "REFUNDED"} ${l.id} in ${j.ms}ms · ${j.paid?.legs ?? 0} one-time payee(s) · ${JSON.stringify(j.result.data ?? j.result).slice(0, 140)}`);
+    say(`${j.ok ? "PAID" : "REFUNDED"} ${l.id} in ${j.ms}ms · fee ${((j.paid?.facilitatorFee ?? 0) / 1e9).toFixed(6)} SOL${j.paid?.tier ? ` (${j.paid.tier})` : ""} · ${j.paid?.legs ?? 0} one-time payee(s) · ${JSON.stringify(j.result.data ?? j.result).slice(0, 140)}`);
   });
 
   return (
@@ -186,6 +188,14 @@ export default function Dapp() {
                 <p className="label mt-2">{a.balance?.toFixed(4) ?? "…"} SOL · spent {a.spent.sol.toFixed(4)}</p>
               </button>
             ))}
+            {holder && (
+              <div className="card p-5">
+                <p className="label">Holder tier</p>
+                <p className="title mt-2 text-2xl">{holder.tier ?? "No tier"} <span className="hush-text">{holder.feePct.toFixed(2)}% fee</span></p>
+                <p className="mt-2 text-xs text-muted">{holder.hush.toLocaleString()} $HUSH in your wallet{holder.perk ? ` · ${holder.perk}` : ""}</p>
+                {holder.next && <p className="mt-1 text-xs text-subtle">{(holder.next.min - holder.hush).toLocaleString()} more for {holder.next.name}</p>}
+              </div>
+            )}
             <div className="card p-5"><p className="label mb-3">Agent GDP</p><GdpCounter /></div>
           </aside>
 

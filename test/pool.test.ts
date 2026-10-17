@@ -27,7 +27,7 @@ test("withdraw plan never leaves an address below rent and covers what it can", 
   const bals = [30_000_000, 12_000_000, 0];
   const { legs, uncovered } = planWithdraw(bals, 35_000_000);
   assert.equal(uncovered, 0);
-  assert.equal(legs.reduce((s, [, x]) => s + x, 0), 35_000_000);
+  assert.equal(legs.reduce((s, [, x]) => s + x + FEE, 0), 35_000_000); // sent + fees == ledger balance
   for (const [i, x] of legs) { const left = bals[i] - x - FEE; assert.ok(left === 0 || left >= RENT_MIN); }
   assert.ok(planWithdraw([1_000_000], 50_000_000).uncovered > 0);
 });
