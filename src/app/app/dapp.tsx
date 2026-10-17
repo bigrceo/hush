@@ -1,22 +1,13 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Connection, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import bs58 from "bs58";
 import { GdpCounter, ScoreTable } from "@/components/live";
+import { detectWallets, INSTALL, onWalletsChange, type HushWallet } from "@/lib/wallets";
 
 const CLUSTER = process.env.NEXT_PUBLIC_CLUSTER || "devnet";
 const RPC = process.env.NEXT_PUBLIC_RPC_URL || (CLUSTER === "mainnet-beta" ? "https://api.mainnet-beta.solana.com" : "https://api.devnet.solana.com");
 const explorer = (sig: string) => `https://explorer.solana.com/tx/${sig}${CLUSTER === "devnet" ? "?cluster=devnet" : ""}`;
-
-type Phantom = {
-  isPhantom?: boolean;
-  publicKey?: PublicKey;
-  connect: () => Promise<{ publicKey: PublicKey }>;
-  disconnect: () => Promise<void>;
-  signMessage: (m: Uint8Array, e: string) => Promise<{ signature: Uint8Array }>;
-  signAndSendTransaction: (t: Transaction) => Promise<{ signature: string }>;
-};
-const phantom = () => (typeof window !== "undefined" ? ((window as unknown as { phantom?: { solana?: Phantom } }).phantom?.solana) : undefined);
 
 type Agent = { id: string; name: string; pubkey: string; dailyBudget: number; perCallCap: number; allowlist: string[]; frozen: boolean; spent: { day: string; sol: number }; balance: number | null; pendingDeposit?: number | null };
 type Listing = { id: string; name: string; seller: string; total: number; currency: string; input?: string; blurb: string };
@@ -24,6 +15,10 @@ type Receipt = { nonce: string; listing: string; total: string; currency: string
 
 export default function Dapp() {
   const [pk, setPk] = useState<string | null>(null);
+  const [wallets, setWallets] = useState<HushWallet[]>([]);
+  const [picker, setPicker] = useState(false);
+  const walletRef = useRef<HushWallet | null>(null);
+  const [walletName, setWalletName] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [frozenAll, setFrozenAll] = useState(false);
@@ -57,23 +52,35 @@ export default function Dapp() {
 
   useEffect(() => { fetch("/api/shop").then((r) => r.json()).then((j) => setListings(j.listings)); }, []);
   useEffect(() => { refresh().catch(() => {}); const t = setInterval(() => refresh().catch(() => {}), 10000); return () => clearInterval(t); }, [refresh]);
-  useEffect(() => { try { const t = sessionStorage.getItem("hush.token"), p = sessionStorage.getItem("hush.pk"); if (t && p) { setToken(t); setPk(p); } } catch {} }, []);
+  useEffect(() => { try { const t = sessionStorage.getItem("hush.token"), p = sessionStorage.getItem("hush.pk"), w = sessionStorage.getItem("hush.wallet"); if (t && p) { setToken(t); setPk(p); setWalletName(w); } } catch {} }, []);
+  useEffect(() => { const up = () => setWallets(detectWallets()); up(); const t = setTimeout(up, 600); const off = onWalletsChange(up); return () => { clearTimeout(t); off(); }; }, []);
 
-  async function connect() {
-    const p = phantom();
-    if (!p) { window.open("https://phantom.app", "_blank"); return; }
+  /** The connected wallet; after a reload it is re-attached by name on first use. */
+  async function activeWallet(): Promise<HushWallet> {
+    if (walletRef.current) return walletRef.current;
+    const w = detectWallets().find((x) => x.name === walletName);
+    if (!w) throw new Error("reconnect your wallet");
+    const addr = await w.connect();
+    if (addr !== pk) throw new Error(`${w.name} is on another account; reconnect`);
+    walletRef.current = w;
+    return w;
+  }
+
+  async function connect(w: HushWallet) {
+    setPicker(false);
     try {
-      const { publicKey } = await p.connect();
-      const pub = publicKey.toBase58();
+      const pub = await w.connect();
       const ts = Date.now();
       const msg = `Sign in to HUSH\nwallet: ${pub}\nts: ${ts}`;
-      const { signature } = await p.signMessage(new TextEncoder().encode(msg), "utf8");
+      const signature = await w.signMessage(new TextEncoder().encode(msg));
       const { token } = await (await fetch("/api/auth", { method: "POST", body: JSON.stringify({ pubkey: pub, ts, signature: bs58.encode(signature) }) })).json();
-      setPk(pub); setToken(token);
-      try { sessionStorage.setItem("hush.token", token); sessionStorage.setItem("hush.pk", pub); } catch {}
-      say("signed in as " + pub.slice(0, 4) + "…" + pub.slice(-4));
+      walletRef.current = w;
+      setPk(pub); setToken(token); setWalletName(w.name);
+      try { sessionStorage.setItem("hush.token", token); sessionStorage.setItem("hush.pk", pub); sessionStorage.setItem("hush.wallet", w.name); } catch {}
+      say(`signed in with ${w.name} as ${pub.slice(0, 4)}…${pub.slice(-4)}`);
     } catch (e) { say("connect failed: " + (e as Error).message); }
   }
+  const openPicker = () => { setWallets(detectWallets()); setPicker(true); };
 
   const agent = agents.find((a) => a.id === sel);
 
@@ -90,12 +97,13 @@ export default function Dapp() {
   });
 
   const fund = (sol: number) => run("fund", async () => {
-    const p = phantom(); if (!p || !agent || !pk) return;
+    if (!agent || !pk) return;
+    const w = await activeWallet();
     const conn = new Connection(RPC, "confirmed");
     const tx = new Transaction().add(SystemProgram.transfer({ fromPubkey: new PublicKey(pk), toPubkey: new PublicKey(agent.pubkey), lamports: Math.round(sol * 1e9) }));
     tx.feePayer = new PublicKey(pk);
     tx.recentBlockhash = (await conn.getLatestBlockhash()).blockhash;
-    const { signature } = await p.signAndSendTransaction(tx);
+    const signature = await w.signAndSend(tx, conn);
     await conn.confirmTransaction(signature, "confirmed");
     say(`funded ${sol} SOL → ${agent.name} (${signature.slice(0, 8)}…)`);
   });
@@ -153,18 +161,18 @@ export default function Dapp() {
         </div>
         {pk ? (
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-muted">{pk.slice(0, 4)}…{pk.slice(-4)}</span>
+            <span className="text-xs text-muted">{walletName ? walletName + " · " : ""}{pk.slice(0, 4)}…{pk.slice(-4)}</span>
             <button onClick={killAll} disabled={busy} className={`btn ${frozenAll ? "btn-hush" : "btn-ghost"}`}>{frozenAll ? "Unfreeze all" : "Freeze all agents"}</button>
           </div>
         ) : (
-          <button onClick={connect} className="btn btn-hush">Connect Phantom</button>
+          <button onClick={openPicker} className="btn btn-hush">Connect wallet</button>
         )}
       </div>
 
       {!pk && (
         <div className="card mt-10 p-10 text-center">
-          <p className="title text-3xl">Connect Phantom to <span className="hush-text">hold the leash.</span></p>
-          <p className="mx-auto mt-3 max-w-md text-muted">Sign once (no transaction), create an agent wallet, fund it, set its limits, let it shop. Running on {CLUSTER}: switch Phantom to the same network.</p>
+          <p className="title text-3xl">Connect a wallet to <span className="hush-text">hold the leash.</span></p>
+          <p className="mx-auto mt-3 max-w-md text-muted">Sign once (no transaction), create an agent wallet, fund it, set its limits, let it shop. Running on {CLUSTER}: switch your wallet to the same network. Phantom, Solflare, Backpack and any Wallet Standard wallet work.</p>
         </div>
       )}
 
@@ -267,6 +275,33 @@ export default function Dapp() {
               <div className="mt-3 max-h-60 space-y-1 overflow-auto font-mono text-xs text-muted">{log.length ? log.map((l, i) => <p key={i}>{l}</p>) : <p className="text-subtle">Nothing yet.</p>}</div>
             </div>
           </section>
+        </div>
+      )}
+      {picker && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={() => setPicker(false)}>
+          <div className="card no-lift w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Connect a wallet">
+            <div className="flex items-center justify-between"><p className="label">Connect a wallet</p><button onClick={() => setPicker(false)} className="text-muted hover:text-fg" aria-label="Close">✕</button></div>
+            <div className="mt-4 space-y-2">
+              {wallets.map((w) => (
+                <button key={w.name} onClick={() => connect(w)} className="card-raised flex w-full items-center gap-3 px-4 py-3 text-left hover:border-hush">
+                  {w.icon ? <img src={w.icon} alt="" className="h-7 w-7 rounded-lg" /> : <span className="h-7 w-7 rounded-lg bg-line" />}
+                  <span className="font-medium">{w.name}</span>
+                  <span className="label ml-auto">Detected</span>
+                </button>
+              ))}
+              {wallets.length === 0 && <p className="text-sm text-muted">No Solana wallet found in this browser.</p>}
+            </div>
+            {INSTALL.some((i) => !wallets.some((w) => w.name.toLowerCase().startsWith(i.name.toLowerCase()))) && (
+              <div className="mt-5 border-t border-line pt-4">
+                <p className="label">Get a wallet</p>
+                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                  {INSTALL.filter((i) => !wallets.some((w) => w.name.toLowerCase().startsWith(i.name.toLowerCase()))).map((i) => (
+                    <a key={i.name} href={i.url} target="_blank" rel="noreferrer" className="text-muted underline hover:text-fg">{i.name} ↗</a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </main>

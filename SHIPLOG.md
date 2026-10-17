@@ -17,3 +17,18 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 
 **Announce:** "Holding $HUSH now cuts your agent's fees on every call. 10M+ holders pay zero."
 - Mainnet buy with claude-demo after deploy: https://solscan.io/tx/2ZNjyHU5x4fMk3yo3bNSAbwK5xqGfvM1Rbssf6yCv6LCXh4avJTTC69onzLwe4dmfQDFbsiMjikA1aFHvHhPSGcu (sent from pool address `2mJik4…H6k7`). The owner wallet `7aA3…xXfy` holds 0 $HUSH on-chain (checked via `getParsedTokenAccountsByOwner`), and the buy returned `tier: null`, `facilitatorFee: 10000` lamports (1% of 0.001 SOL). The discounted tiers were verified on the local validator only, since no test wallet holds real $HUSH.
+
+## 2026-10-17 · Solflare, Backpack and any Wallet Standard wallet
+
+**Shipped**
+- The app now connects any Wallet Standard Solana wallet (Phantom, Solflare, Backpack, ...) through `@wallet-standard/app`, with legacy injected providers (`window.phantom.solana`, `window.solflare`, `window.backpack`) as a fallback. Sign-in, funding the agent deposit address and withdraw all work through the chosen wallet (`src/lib/wallets.ts`).
+- New wallet picker in the site style: detected wallets with their icons, plus install links for the ones that are missing. The wallet is re-attached by name after a page reload.
+
+**Verified**
+- `scripts/wallet-e2e.mjs` on a local validator drives the real app in Chromium twice:
+  - with an injected Wallet Standard wallet registered the way Backpack and Solflare do it (`standard:connect`, `solana:signMessage`, `solana:signAndSendTransaction`);
+  - with a legacy `window.solflare` provider that only has `signTransaction`.
+- Both ran connect → sign-in → create agent → fund 0.05 SOL → private buy → withdraw from the pool back to the owner.
+- Screenshot: `screenshots/wallet-picker.png`.
+
+**Announce:** "HUSH now works with Solflare, Backpack and every Wallet Standard wallet, not just Phantom."
