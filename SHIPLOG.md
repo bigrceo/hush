@@ -159,3 +159,13 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - Buyer export for the demo owner: 10 receipts, `content-type: text/csv`, attachment filename; date filter on 2026-10-17 returns 7 rows; seller export lists the `s-17cdc8bf13` sale with its sweep tx; anonymous request → 401.
 
 **Image:** `x-launch-pack/updates/03-csv-export.png`
+
+## 2026-10-17 · Public stats page
+
+**Shipped**
+- `/stats` (in the header and footer): paid agent calls, SOL paid to sellers, refunds, median latency, agents created and active in 7 days, shop listings (incl. self-serve), anchored receipt epochs, $HUSH burned; daily paid-calls chart since the first receipt (hover for paid / refunded / SOL); per-listing totals; latest anchor memo tx.
+- `GET /api/stats/daily`: same data as JSON, cached 60 s. Counts and volumes only, no payer / payee / signature. Code: `src/lib/statsdaily.ts`.
+
+**Verified live** (17 Oct, 15:1x): 109 paid calls, 1 refund, 0.147 SOL, median 82 ms, 8 anchored epochs, 5.08 $HUSH burned, 9 listings (1 self-serve).
+
+**Image:** `x-launch-pack/updates/04-stats.png`
