@@ -225,3 +225,16 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - `python -m hush_agents buy sol-price` with the demo agent key: https://solscan.io/tx/3eFpZXcT5EMToLy8ncvuVe5Q23pKhzXFm1th7FFNmFaoQvPbt7CeEkWnpUN71D1nKgeLH9UBSmVV6aDAFtDyx8S7 (pool address `2mJik4…H6k7`), answer 104.035 USD.
 
 **Image:** `x-launch-pack/updates/08-python.png`
+
+## 2026-10-17 · Agent Shop: bundle check
+
+**Shipped**
+- New listing `bundle-check` (0.001 SOL per call, paid privately from the pool). Input: `mint`.
+- Takes the top 20 holders (pools, bonding curves and program accounts excluded), finds each wallet's first transaction (within its last 100) to get who funded it and the slot it was born in. Links holders that share a funder, share a birth slot, or were funded by another top holder. Returns clusters with their wallets and % of circulating supply, linked wallet count and supply. Flags: 3+ top holders in one cluster, or linked wallets holding 10%+.
+- Code: `src/lib/bundle.ts`, `src/lib/bundlerules.ts`. Test: `test/bundle.test.ts`.
+
+**Verified on mainnet**
+- Paid call on GOAT: https://solscan.io/tx/3dYawb2j29mc7H9D47SpcqaMgox5CqNcfiRqvfpPsXCYuhWwKABdgxdvpYLK2hU5JE39B6PxtDMzRWnyKx3EpPpa (signed by pool address `2mJik4…H6k7`), 3.6 s.
+- Result: 1 cluster, top holder `EZ41…xjsJ` funded top holder `AMMg…P4kX`, together 12.97% of circulating supply, flagged.
+
+**Image:** `x-launch-pack/updates/09-bundle-check.png`
