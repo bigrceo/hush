@@ -250,3 +250,17 @@ Each entry: what shipped, how it was verified, and a one-line announcement idea.
 - `/sell` serves the template block. Test endpoint: Jupiter price URL → ok, HTTP 200, 46 ms, 218 bytes, JSON; an HTTP 500 URL → not ready, "answered HTTP 500: buyers would be refunded"; `hushagents.com` URL → refused (400). Unsigned call → 401.
 
 **Image:** `x-launch-pack/updates/10-seller-templates.png`
+
+## 2026-10-19 · Compare: what a payment tells everyone
+
+**Shipped**
+- New page `/compare` (linked in the footer): two panels side by side. Paste any Solana transaction (wallet transfer, x402 USDC payment, anything) and read it from mainnet the way a stranger would; next to it, a HUSH payout read the same way.
+- Public API `GET /api/privacy/exposure?tx=<sig>`: fee payer, whether it is a HUSH pool address, payer's earlier transaction count, first activity and live balance; every receiver (SOL and SPL token deltas, owner level) with its earlier transaction count and how many earlier transactions it shares with the payer; a plain list of leaks and a verdict.
+- Defaults are the demo agent's own deposit (plain wallet transfer) and its latest paid call. No SOL spent.
+- Code: `src/lib/exposure.ts`, `src/app/api/privacy/exposure/route.ts`, `src/app/compare/`.
+
+**Verified live (mainnet)**
+- Wallet deposit `5tureP…YSC`: 6 leaks (payer's own wallet signed, 7 earlier txs, live balance, direct payer → receiver link, 2 shared earlier txs, receiver reused with 8 earlier txs).
+- HUSH payout `3dYawb…Ppa`: signed by pool `2mJik4…H6k7`, payee `BVbG…VbaU` with 0 earlier transactions and 0 shared history; verdict "nothing links a payer to this payment".
+
+**Image:** `x-launch-pack/updates/11-compare.png`
