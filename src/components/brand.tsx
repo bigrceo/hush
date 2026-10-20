@@ -70,7 +70,7 @@ export function Footer() {
         </div>
         <div className="flex flex-col gap-3 text-sm text-muted">
           <span className="label mb-1">Product</span>
-          <Link href="/app">App</Link><Link href="/docs">Docs</Link><Link href="/sell">Sell</Link><Link href="/stats">Stats</Link><Link href="/verify">Verify</Link><Link href="/proof">Proof</Link><Link href="/compare">Compare</Link><Link href="/leaks">Leak scan</Link><Link href="/whitepaper">Whitepaper</Link>
+          <Link href="/app">App</Link><Link href="/docs">Docs</Link><Link href="/sell">Sell</Link><Link href="/stats">Stats</Link><Link href="/verify">Verify</Link><Link href="/proof">Proof</Link><Link href="/compare">Compare</Link><Link href="/leaks">Leak scan</Link><Link href="/reserves">Reserves</Link><Link href="/whitepaper">Whitepaper</Link>
         </div>
         <div className="flex flex-col gap-3 text-sm text-muted">
           <span className="label mb-1">$HUSH</span>
