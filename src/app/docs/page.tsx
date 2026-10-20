@@ -36,6 +36,10 @@ export const GET = sell(
           <Code label="curl">{`curl -X POST https://<host>/api/agent/buy \\
   -H "x-agent-key: hush_…" -H "content-type: application/json" \\
   -d '{"listing":"market-brief"}'`}</Code></> },
+        { id: "discovery", title: "Discovery", body: <>
+          <p>Agents and x402 indexers can find every paid endpoint without reading the site. <code>/.well-known/x402</code> is the JSON catalog: resource URL, input, price, network and privacy scheme for each Agent Shop and self-serve listing. <code>/llms.txt</code> is the same list in plain text for LLMs.</p>
+          <Code label="curl">{`curl https://hushagents.com/.well-known/x402
+curl https://hushagents.com/llms.txt`}</Code></> },
         { id: "x402", title: "Private x402 flow", body: <>
           <p>A call without payment gets <code>402</code> and an <code>accepts</code> array, x402 style. HUSH adds <code>extra.legs</code>: one stealth <code>payTo</code> per seller, derived from the gate secret and a fresh nonce, plus a signed <code>quote</code>.</p>
           <Code label="402 body">{`{ "x402Version": 1, "accepts": [{

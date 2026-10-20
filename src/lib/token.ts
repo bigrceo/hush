@@ -14,8 +14,8 @@ export const TOKEN = {
 
 export const LINKS = {
   buy: process.env.NEXT_PUBLIC_BUY_URL || "https://pump.fun",
-  x: process.env.NEXT_PUBLIC_X_URL || "",
-  telegram: process.env.NEXT_PUBLIC_TG_URL || "",
+  x: process.env.NEXT_PUBLIC_X_URL || "https://x.com/hush_agents",
+  telegram: process.env.NEXT_PUBLIC_TG_URL || "https://t.me/hushagents",
   dexscreener: TOKEN.mint ? `https://dexscreener.com/solana/${TOKEN.mint}` : "",
   pump: TOKEN.mint ? `https://pump.fun/coin/${TOKEN.mint}` : "",
   holders: TOKEN.mint ? `https://solscan.io/token/${TOKEN.mint}#holders` : "",
